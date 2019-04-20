@@ -110,7 +110,7 @@ class CubeOperator(reducers: Int) {
                                     .reduceByKey(aggFunc(agg), reducers)
     }
     
-    reducedAttrib.collect().foreach(println)
+//    reducedAttrib.collect().foreach(println)
 
     reducedAttrib
     
