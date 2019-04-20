@@ -5,15 +5,20 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.expressions._
 import org.apache.spark.sql.functions._
 import java.io._
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql._
 
 object Main {
   def main(args: Array[String]) {
     val reducers = 10
 
 //    val inputFile = "../lineorder_small.tbl"
-    val path = "/Users/yawen/Documents/Scala/lineorder_small.tbl"
+//    val path = "/Users/yawen/Documents/Scala/lineorder_small.tbl"
 //    val input = new File(getClass.getResource(inputFile).getFile).getPath
-    val input = new File(path).getPath
+//    val input = new File(path).getPath
+    
+    val inputFile= "../lineorder_small2.tbl"
+    val input = new File(getClass.getResource(inputFile).getFile).getPath
 
     val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
     val ctx = new SparkContext(sparkConf)
@@ -35,9 +40,9 @@ object Main {
     val cb = new CubeOperator(reducers)
 
     var groupingList = List("lo_suppkey","lo_shipmode","lo_orderdate")
-//
-    val res = cb.cube_naive(dataset, groupingList, "lo_supplycost", "COUNT")
-
+    val res = cb.cube(dataset, groupingList, "lo_supplycost", "SUM")
+    res.collect().foreach(x => println(x))
+//    val res = cb.cube_naive(dataset, groupingList, "lo_supplycost", "SUM")
     /*
        The above call corresponds to the query:
        SELECT lo_suppkey, lo_shipmode, lo_orderdate, SUM (lo_supplycost)
@@ -47,10 +52,9 @@ object Main {
 
 
     //Perform the same query using SparkSQL
-    //    val q1 = df.cube("lo_suppkey","lo_shipmode","lo_orderdate")
-    //      .agg(sum("lo_supplycost") as "sum supplycost")
-    //    q1.show
-    
+    val q1 = df.cube("lo_suppkey","lo_shipmode","lo_orderdate")
+      .agg(sum("lo_supplycost") as "sum supplycost")
+    q1.show
   }
   
 }
