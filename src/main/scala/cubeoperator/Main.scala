@@ -10,8 +10,10 @@ object Main {
   def main(args: Array[String]) {
     val reducers = 10
 
-    val inputFile= "../lineorder_small.tbl"
-    val input = new File(getClass.getResource(inputFile).getFile).getPath
+//    val inputFile = "../lineorder_small.tbl"
+    val path = "/Users/yawen/Documents/Scala/lineorder_small.tbl"
+//    val input = new File(getClass.getResource(inputFile).getFile).getPath
+    val input = new File(path).getPath
 
     val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
     val ctx = new SparkContext(sparkConf)
@@ -25,7 +27,7 @@ object Main {
       .load(input)
 
     val rdd = df.rdd
-
+        
     val schema = df.schema.toList.map(x => x.name)
 
     val dataset = new Dataset(rdd, schema)
@@ -33,8 +35,8 @@ object Main {
     val cb = new CubeOperator(reducers)
 
     var groupingList = List("lo_suppkey","lo_shipmode","lo_orderdate")
-
-    val res = cb.cube(dataset, groupingList, "lo_supplycost", "SUM")
+//
+    val res = cb.cube_naive(dataset, groupingList, "lo_supplycost", "COUNT")
 
     /*
        The above call corresponds to the query:
@@ -48,7 +50,7 @@ object Main {
     //    val q1 = df.cube("lo_suppkey","lo_shipmode","lo_orderdate")
     //      .agg(sum("lo_supplycost") as "sum supplycost")
     //    q1.show
-
-
+    
   }
+  
 }
