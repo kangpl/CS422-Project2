@@ -23,6 +23,7 @@ class Task1Test extends FlatSpec {
   //    // Read in the datasets
   //    val pathSmall = "/Users/yawen/Documents/Scala/lineorder_small.tbl"
   //    //    val pathSmall = "../lineorder_small.tbl"
+
   //    val (datasetSmall, dfSmall) = readResource(pathSmall)
   //
   //    inputSizeTest(cb, datasetSmall, dfSmall, "Small")
@@ -79,13 +80,72 @@ class Task1Test extends FlatSpec {
 
     cubeAttributeTest(cb, datasetMedium, groupingList, "5")
   }
-  
-    it should "give same results for 6 attributes" in {
+
+  it should "give same results for 6 attributes" in {
     val reducers = 4
     val cb = new CubeOperator(reducers)
     val groupingList = List("lo_suppkey", "lo_shipmode", "lo_orderdate", "lo_orderkey", "lo_orderpriority", "lo_shippriority")
 
     cubeAttributeTest(cb, datasetMedium, groupingList, "6")
+  }
+
+  "Cube naive and MRCube reducer test" should "give same results for 4 reducers" in {
+    val reducers = 4
+    val cb = new CubeOperator(reducers)
+
+    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    val pathMedium = "../lineorder_medium.tbl"
+    val (datasetMedium, dfMedium) = readResource(pathMedium)
+
+    reducerSizeTest(cb, datasetMedium, "4")
+
+  }
+
+  it should "give same results for 8 reducers" in {
+    val reducers = 8
+    val cb = new CubeOperator(reducers)
+
+    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    val pathMedium = "../lineorder_medium.tbl"
+    val (datasetMedium, dfMedium) = readResource(pathMedium)
+
+    reducerSizeTest(cb, datasetMedium, "8")
+
+  }
+
+  it should "give same results for medium dataset 12 reducers" in {
+    val reducers = 12
+    val cb = new CubeOperator(reducers)
+
+    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    val pathMedium = "../lineorder_medium.tbl"
+    val (datasetMedium, dfMedium) = readResource(pathMedium)
+
+    reducerSizeTest(cb, datasetMedium, "12")
+
+  }
+
+  it should "give same results for medium dataset 16 reducers" in {
+    val reducers = 16
+    val cb = new CubeOperator(reducers)
+
+    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    val pathMedium = "../lineorder_medium.tbl"
+    val (datasetMedium, dfMedium) = readResource(pathMedium)
+
+    reducerSizeTest(cb, datasetMedium, "16")
+
+  }
+
+  it should "give same results for medium dataset 20 reducers" in {
+    val reducers = 20
+    val cb = new CubeOperator(reducers)
+
+    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    val pathMedium = "../lineorder_medium.tbl"
+    val (datasetMedium, dfMedium) = readResource(pathMedium)
+
+    reducerSizeTest(cb, datasetMedium, "20")
   }
 
   // Methods
@@ -144,6 +204,19 @@ class Task1Test extends FlatSpec {
 
     assert(res_MRCube == res_cubeNaive)
 
+  }
+
+  def reducerSizeTest(cb: CubeOperator, dataset: Dataset, size: String) {
+    val op = "SUM"
+    var groupingList = List("lo_suppkey", "lo_shipmode", "lo_orderdate")
+
+    // Evaluate and count execution time
+    val res_MRCube = timer { ("MRCube_reducer_" + size, cb.cube(dataset, groupingList, "lo_supplycost", op).count()) }
+    val res_cubeNaive = timer { ("cubeNaive_reducer_" + size, cb.cube_naive(dataset, groupingList, "lo_supplycost", op).count()) }
+
+    // Compare results
+
+    assert(res_MRCube == res_cubeNaive)
   }
 
 }
