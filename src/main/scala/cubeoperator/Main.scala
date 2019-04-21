@@ -22,11 +22,11 @@ object Main {
   def main(args: Array[String]) {
     val reducers = 10
 
-    val path = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-    val input = new File(path).getPath
+//    val path = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+//    val input = new File(path).getPath
 
-    //    val inputFile= "../lineorder_small.tbl"
-    //    val input = new File(getClass.getResource(inputFile).getFile).getPath
+    val inputFile= "../lineorder_small.tbl"
+    val input = new File(getClass.getResource(inputFile).getFile).getPath
 
     val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
     val ctx = new SparkContext(sparkConf)
@@ -68,23 +68,28 @@ object Main {
     println("!!!start test!!!")
     val result1 = res_MRCube.sortBy(_._1, ascending = false)
     //    result1.collect().foreach(x => println(x))
+
+    println("# cube result " + result1.count())
     println("================================")
 
     val q1Rdd: RDD[Row] = q1.rdd
-    val q1Mapped = q1Rdd.map(row => (parse(row)))
+    val q1Mapped = q1Rdd.map(row => (parse(row, "COUNT")))
     val result2 = q1Mapped.sortBy(_._1, ascending = false)
     //    result2.collect().foreach(x => println(x))
+
+    println("# sparksql result " + result2.count())
     println("================================")
 
     val diff = result1.join(result2).collect {
-      case (k, (s1, s2)) if s1 != s2 => (k, s1, s2)
+      case (k, (s1, s2)) if s1 == s2 => (k, s1, s2)
     }
-    diff.collect().foreach(x => println(x))
-
+//    diff.collect().foreach(x => println(x))
+    
+    println("# test result " + diff.count())
     println("!!!finish test!!!")
   }
 
-  def parse(x: Row): (String, Double) = {
+  def parse(x: Row, aggType: String): (String, Double) = {
     var res: String = ""
     if (x(0) != null && (x(1) != null || x(2) != null)) res += x(0) + "_"
     else if (x(0) != null) res += x(0)
@@ -92,8 +97,15 @@ object Main {
     if (x(1) != null && x(2) != null) res += x(1) + "_" + x(2)
     else if (x(1) != null) res += x(1)
     else if (x(2) != null) res += x(2)
-
-    (res, x.getLong(3).toDouble)
+    
+    val result = aggType match {
+      case "AVG" => (res, x.getDouble(3))
+      case "COUNT" => (res, x.getLong(3).toDouble)
+      case "SUM" => (res, x.getLong(3).toDouble)
+      case _ => (res, x.getInt(3).toDouble)
+      
+    }
+    result
   }
 
 }
