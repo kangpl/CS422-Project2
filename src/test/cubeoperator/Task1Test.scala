@@ -93,10 +93,6 @@ class Task1Test extends FlatSpec {
     val reducers = 4
     val cb = new CubeOperator(reducers)
 
-    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-    val pathMedium = "../lineorder_medium.tbl"
-    val (datasetMedium, dfMedium) = readResource(pathMedium)
-
     reducerSizeTest(cb, datasetMedium, "4")
 
   }
@@ -104,10 +100,6 @@ class Task1Test extends FlatSpec {
   it should "give same results for 8 reducers" in {
     val reducers = 8
     val cb = new CubeOperator(reducers)
-
-    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-    val pathMedium = "../lineorder_medium.tbl"
-    val (datasetMedium, dfMedium) = readResource(pathMedium)
 
     reducerSizeTest(cb, datasetMedium, "8")
 
@@ -117,10 +109,6 @@ class Task1Test extends FlatSpec {
     val reducers = 12
     val cb = new CubeOperator(reducers)
 
-    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-    val pathMedium = "../lineorder_medium.tbl"
-    val (datasetMedium, dfMedium) = readResource(pathMedium)
-
     reducerSizeTest(cb, datasetMedium, "12")
 
   }
@@ -129,10 +117,6 @@ class Task1Test extends FlatSpec {
     val reducers = 16
     val cb = new CubeOperator(reducers)
 
-    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-    val pathMedium = "../lineorder_medium.tbl"
-    val (datasetMedium, dfMedium) = readResource(pathMedium)
-
     reducerSizeTest(cb, datasetMedium, "16")
 
   }
@@ -140,10 +124,6 @@ class Task1Test extends FlatSpec {
   it should "give same results for medium dataset 20 reducers" in {
     val reducers = 20
     val cb = new CubeOperator(reducers)
-
-    //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-    val pathMedium = "../lineorder_medium.tbl"
-    val (datasetMedium, dfMedium) = readResource(pathMedium)
 
     reducerSizeTest(cb, datasetMedium, "20")
   }
