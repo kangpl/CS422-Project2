@@ -22,11 +22,11 @@ object Main {
   def main(args: Array[String]) {
     val reducers = 10
 
-//    val path = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-//    val input = new File(path).getPath
+    val path = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    val input = new File(path).getPath
 
-    val inputFile= "../lineorder_small.tbl"
-    val input = new File(getClass.getResource(inputFile).getFile).getPath
+//    val inputFile= "../lineorder_small.tbl"
+//    val input = new File(getClass.getResource(inputFile).getFile).getPath
 
     val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
     val ctx = new SparkContext(sparkConf)
@@ -55,8 +55,8 @@ object Main {
      */
 
     var groupingList = List("lo_suppkey", "lo_shipmode", "lo_orderdate")
-    val res_MRCube = timer { ("MRCube", cb.cube(dataset, groupingList, "lo_supplycost", "COUNT")) }
-    val res_cubeNaive = timer { ("cube_naive", cb.cube_naive(dataset, groupingList, "lo_supplycost", "COUNT")) }
+    val res_MRCube = timer { ("MRCube", cb.cube(dataset, groupingList, "lo_supplycost", "SUM")) }
+    val res_cubeNaive = timer { ("cube_naive", cb.cube_naive(dataset, groupingList, "lo_supplycost", "SUM")) }
     println("Finish the cube algorithm implemented for task1")
 
     //Perform the same query using SparkSQL
@@ -73,7 +73,7 @@ object Main {
     println("================================")
 
     val q1Rdd: RDD[Row] = q1.rdd
-    val q1Mapped = q1Rdd.map(row => (parse(row, "COUNT")))
+    val q1Mapped = q1Rdd.map(row => (parse(row, "SUM")))
     val result2 = q1Mapped.sortBy(_._1, ascending = false)
     //    result2.collect().foreach(x => println(x))
 
