@@ -110,7 +110,7 @@ class CubeOperator(reducers: Int) {
           i => row(i) // get all values of the corresponding index
         ).combinations(indexVal).toList.map( // list.comb(2) -> tuples of (1, 2) (1, 3) (2, 3)
             region =>
-              if (agg == "COUNT") (region.mkString("_"), 1.toDouble) // val1-val2-val3, 1
+              if (agg == "COUNT") (region.mkString("_"), 1.toDouble) // val1_val2_val3, 1
               else if (agg == "AVG") (region.mkString("_"), (row.getInt(indexAgg).toDouble, 1.toDouble))
               else (region.mkString("_"), row.getInt(indexAgg).toDouble) // getInt(indexAgg) => get saved value from the rdd
           )))

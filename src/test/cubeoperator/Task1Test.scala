@@ -9,37 +9,13 @@ import java.io._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 
-
-class Parser extends java.io.Serializable {
-    def parse(x: Row, aggType: String): (String, Double) = {
-    var res: String = ""
-    if (x(0) != null && (x(1) != null || x(2) != null)) res += x(0) + "_"
-    else if (x(0) != null) res += x(0)
-
-    if (x(1) != null && x(2) != null) res += x(1) + "_" + x(2)
-    else if (x(1) != null) res += x(1)
-    else if (x(2) != null) res += x(2)
-
-    val result = aggType match {
-      case "AVG"   => (res, x.getDouble(3))
-      case "COUNT" => (res, x.getLong(3).toDouble)
-      case "SUM"   => (res, x.getLong(3).toDouble)
-      case _       => (res, x.getInt(3).toDouble)
-
-    }
-    result
-  }
-}
-
 class Task1Test extends FlatSpec {
 
   // Set up Environment
   val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
   val ctx = new SparkContext(sparkConf)
   val sqlContext = new org.apache.spark.sql.SQLContext(ctx)
-  
-  val parser = new Parser()
-  
+
   "Cube naive and MRCube" should "give same results for small dataset" in {
     val reducers = 4
     val cb = new CubeOperator(reducers)
@@ -52,29 +28,29 @@ class Task1Test extends FlatSpec {
     inputSizeTest(cb, datasetSmall, dfSmall, "Small")
   }
 
-  //  it should "give same results for medium dataset" in {
-  //    val reducers = 4
-  //    val cb = new CubeOperator(reducers)
-  //
-  //    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
-  //    //  val pathMedium = "../lineorder_medium.tbl"
-  //    val (datasetMedium, dfMedium) = readResource(pathMedium)
-  //
-  //    inputSizeTest(cb, datasetMedium, dfMedium, "Medium")
-  //
-  //  }
-  //
-  //  it should "give same results for big dataset" in {
-  //    val reducers = 4
-  //    val cb = new CubeOperator(reducers)
-  //
-  //    val pathBig = "/Users/yawen/Documents/Scala/lineorder_big.tbl"
-  //    //  val pathBig = "../lineorder_big.tbl"
-  //    val (datasetBig, dfBig) = readResource(pathBig)
-  //
-  //    inputSizeTest(cb, datasetBig, dfBig, "Big")
-  //
-  //  }
+  it should "give same results for medium dataset" in {
+    val reducers = 4
+    val cb = new CubeOperator(reducers)
+
+    val pathMedium = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    //  val pathMedium = "../lineorder_medium.tbl"
+    val (datasetMedium, dfMedium) = readResource(pathMedium)
+
+    inputSizeTest(cb, datasetMedium, dfMedium, "Medium")
+
+  }
+
+  it should "give same results for big dataset" in {
+    val reducers = 4
+    val cb = new CubeOperator(reducers)
+
+    val pathBig = "/Users/yawen/Documents/Scala/lineorder_big.tbl"
+    //  val pathBig = "../lineorder_big.tbl"
+    val (datasetBig, dfBig) = readResource(pathBig)
+
+    inputSizeTest(cb, datasetBig, dfBig, "Big")
+
+  }
 
   // Methods
   //  def currentMethodName(): String = Thread.currentThread.getStackTrace()(2).getMethodName
@@ -117,27 +93,12 @@ class Task1Test extends FlatSpec {
     val res_cubeNaive = timer { ("cubeNaive_" + size, cb.cube_naive(dataset, groupingList, "lo_supplycost", op)) }
 
     // Compare results
-    //    val resultSorted_MRCube = res_MRCube.sortBy(_._1, ascending = false)
-    //    val resultSorted_cubeNaive = res_cubeNaive.sortBy(_._1, ascending = false)
+    val diff_MRCube = res_MRCube.join(res_cubeNaive).collect {
+      case (k, (s1, s2)) if s1 == s2 => (k, s1, s2)
+    }
 
-    val sql = df.cube("lo_suppkey", "lo_shipmode", "lo_orderdate")
-      .agg(count("lo_supplycost") as "sum supplycost")
-
-    val sqlRdd: RDD[Row] = sql.rdd
-    val sqlMapped = sqlRdd.map(row => parser.parse(row, op))
-    val result_sql = sqlMapped.sortBy(_._1, ascending = false)
-
-    //    val diff_MRCube = resultSorted_MRCube.join(result_sql).collect {
-    //      case (k, (s1, s2)) if s1 == s2 => (k, s1, s2)
-    //    }
-    //
-    //    val diff_cubeNaive = resultSorted_cubeNaive.join(result_sql).collect {
-    //      case (k, (s1, s2)) if s1 == s2 => (k, s1, s2)
-    //    }
-    //
-    //    assert(diff_MRCube.isEmpty)
-    //    assert(diff_cubeNaive.isEmpty)
-    //    assert(diff_MRCube.count() == diff_cubeNaive.count())
+    assert(diff_MRCube.count() == res_MRCube.count())
+    assert(diff_MRCube.count() == res_cubeNaive.count())
 
   }
 
