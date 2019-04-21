@@ -1,5 +1,0 @@
-package cubeoperator
-
-class Test {
-  
-}
