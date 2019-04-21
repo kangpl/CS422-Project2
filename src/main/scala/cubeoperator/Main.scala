@@ -10,14 +10,24 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 
 object Main {
+  
+  
+  def timer[R](block: => (String, R)): R = {
+    val t0 = System.nanoTime()
+    val result = block._2    // call-by-name
+    val t1 = System.nanoTime()
+    println(block._1 + "'s execution time: " + (t1 - t0) + "ns")
+    result
+  }
+  
   def main(args: Array[String]) {
     val reducers = 10
     
-//    val path = "/Users/yawen/Documents/Scala/lineorder_small.tbl"
-//    val input = new File(path).getPath
+    val path = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
+    val input = new File(path).getPath
     
-    val inputFile= "../lineorder_small2.tbl"
-    val input = new File(getClass.getResource(inputFile).getFile).getPath
+//    val inputFile= "../lineorder_small2.tbl"
+//    val input = new File(getClass.getResource(inputFile).getFile).getPath
 
     val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
     val ctx = new SparkContext(sparkConf)
@@ -46,7 +56,8 @@ object Main {
      */
 
     var groupingList = List("lo_suppkey","lo_shipmode","lo_orderdate")
-    val res = cb.cube(dataset, groupingList, "lo_supplycost", "COUNT")
+    val res_MRCube = timer{("MRCube", cb.cube(dataset, groupingList, "lo_supplycost", "COUNT"))}
+    val res_cubeNaive = timer{("cube_naive", cb.cube_naive(dataset, groupingList, "lo_supplycost", "COUNT"))}
     println("Finish the cube algorithm implemented for task1")
     
     //Perform the same query using SparkSQL
@@ -56,18 +67,18 @@ object Main {
     
     //test whether the result is same
     println("!!!start test!!!")
-    val result1 = res.sortBy(_._1, ascending = false)
-    result1.collect().foreach(x => println(x))
+    val result1 = res_MRCube.sortBy(_._1, ascending = false)
+//    result1.collect().foreach(x => println(x))
     println("================================")
     
     val q1Rdd: RDD[Row] = q1.rdd
     val q1Mapped = q1Rdd.map(row => (parse(row)))
     val result2 = q1Mapped.sortBy(_._1, ascending = false)
-    result2.collect().foreach(x => println(x))
+//    result2.collect().foreach(x => println(x))
     println("================================")
     
     val diff = result1.join(result2).collect {
-        case (k, (s1, s2)) if s1 == s2 => (k, s1, s2)
+        case (k, (s1, s2)) if s1 != s2 => (k, s1, s2)
     }
     diff.collect().foreach(x => println(x))
   
@@ -86,4 +97,5 @@ object Main {
      
     (res, x.getLong(3).toDouble)
   } 
+
 }
