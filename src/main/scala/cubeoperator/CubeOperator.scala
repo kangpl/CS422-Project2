@@ -3,18 +3,6 @@ package cubeoperator
 import org.apache.spark.rdd.RDD
 
 class CubeOperator(reducers: Int) {
-  
-  
-  def avgFunc : ((Double, Double), (Double, Double)) => (Double, Double) = {
-    (pair1: (Double, Double), pair2: (Double, Double)) => (pair1._1 + pair2._1, pair1._2 + pair2._2)
-  }
-  
-  
-  def aggFunc(agg: String) : (Double, Double) => Double = {
-    if (agg == "MAX") (value1: Double, value2: Double) => if (value1 < value2) value1 else value2
-    else if (agg == "MIN") (value1: Double, value2: Double) => if (value1 > value2) value1 else value2
-    else (value1: Double, value2: Double) => (value1 + value2)
-  }
 
   /*
  * This method gets as input one dataset, the grouping attributes of the cube (CUBE BY clause)
@@ -77,6 +65,17 @@ class CubeOperator(reducers: Int) {
     
     cuboids
   }
+  
+  def avgFunc : ((Double, Double), (Double, Double)) => (Double, Double) = {
+    (pair1: (Double, Double), pair2: (Double, Double)) => (pair1._1 + pair2._1, pair1._2 + pair2._2)
+   }
+  
+  
+  def aggFunc(agg: String) : (Double, Double) => Double = {
+    if (agg == "MAX") (value1: Double, value2: Double) => if (value1 > value2) value1 else value2
+    else if (agg == "MIN") (value1: Double, value2: Double) => if (value1 < value2) value1 else value2
+    else (value1: Double, value2: Double) => (value1 + value2)
+  }
 
   def cube_naive(dataset: Dataset, groupingAttributes: List[String], aggAttribute: String, agg: String): RDD[(String, Double)] = {
     
@@ -94,9 +93,9 @@ class CubeOperator(reducers: Int) {
               i => row(i)                // get all values of the corresponding index
           ).combinations(indexVal).toList.map( // list.comb(2) -> tuples of (1, 2) (1, 3) (2, 3)
             region => 
-              if (agg == "COUNT") (region.mkString("-"), 1.toDouble) // val1-val2-val3, 1
-              else if (agg == "AVG") (region.mkString("-"), (row.getInt(indexAgg).toDouble, 1.toDouble))
-              else (region.mkString("-"), row.getInt(indexAgg).toDouble) // getInt(indexAgg) => get saved value from the rdd
+              if (agg == "COUNT") (region.mkString("_"), 1.toDouble) // val1-val2-val3, 1
+              else if (agg == "AVG") (region.mkString("_"), (row.getInt(indexAgg).toDouble, 1.toDouble))
+              else (region.mkString("_"), row.getInt(indexAgg).toDouble) // getInt(indexAgg) => get saved value from the rdd
           )
         )
     )
@@ -110,10 +109,8 @@ class CubeOperator(reducers: Int) {
                                     .reduceByKey(aggFunc(agg), reducers)
     }
     
-//    reducedAttrib.collect().foreach(println)
-
     reducedAttrib
-    
+   
   }
 
 }
