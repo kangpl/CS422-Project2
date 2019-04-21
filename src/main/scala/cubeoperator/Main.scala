@@ -26,7 +26,7 @@ object Main {
     val path = "/Users/yawen/Documents/Scala/lineorder_medium.tbl"
     val input = new File(path).getPath
     
-//    val inputFile= "../lineorder_small2.tbl"
+//    val inputFile= "../lineorder_small.tbl"
 //    val input = new File(getClass.getResource(inputFile).getFile).getPath
 
     val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
