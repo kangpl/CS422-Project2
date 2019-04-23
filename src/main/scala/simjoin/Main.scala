@@ -30,20 +30,20 @@ object Main {
     .option("delimiter", ",")
     .load(input)      
     
-    val rdd = df.rdd        
+    val rdd = df.rdd       
     val schema = df.schema.toList.map(x => x.name)    
-    val dataset = new Dataset(rdd, schema)           
+    val dataset = new Dataset(rdd, schema)  
     
-    
-    val t1 = System.nanoTime    
+//    val t1 = System.nanoTime    
     val sj = new SimilarityJoin(numAnchors, distanceThreshold)
     val res = sj.similarity_join(dataset, attrIndex)           
-    
-    val resultSize = res.count
-    println(resultSize)
-    val t2 = System.nanoTime
-            
-    println((t2-t1)/(Math.pow(10,9)))
+//    
+//    val resultSize = res.count
+//    println(resultSize)
+//    val t2 = System.nanoTime
+//            
+//    println((t2-t1)/(Math.pow(10,9)))
+
     
     /*
     // cartesian
@@ -53,6 +53,6 @@ object Main {
                                    
     println(cartesian.count)
     val t2Cartesian = System.nanoTime
-    println((t2Cartesian-t1Cartesian)/(Math.pow(10,9)))*/    
+    println((t2Cartesian-t1Cartesian)/(Math.pow(10,9))) */
   }     
 }
