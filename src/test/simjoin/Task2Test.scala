@@ -124,8 +124,8 @@ class Task2Test extends FlatSpec {
       .sortBy(line => (line._1, line._2), ascending = true)
       
     val diff = cartesianResults.join(clusterResults).collect {
-      case (k, (s1, s2)) if s1 == s2 =>
-        print("Difference: " + k + ": " + s1 + " vs " + s2)
+      case (k, (s1, s2)) if s1 != s2 =>
+        println("Difference: " + k + ": " + s1 + " vs " + s2)
         (k, s1, s2)
     }
 
