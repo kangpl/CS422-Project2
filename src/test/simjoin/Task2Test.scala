@@ -26,12 +26,21 @@ class Task2Test extends FlatSpec {
 
   "Clusterjoin and Catesian join" should "give same results for 1k dataset" in {
     // Read in the datasets
-    val pathSmall = "/Users/yawen/Documents/Scala/dblp_1K.csv"
-    //    val pathSmall = "../dblp_1K.csv"
+    val pathSmall = "/Users/yawen/Documents/Scala/dblp_1k.csv"
+    //    val pathSmall = "../dblp_1k.csv"
 
     val (datasetSmall, rddSmall) = readResource(pathSmall)
 
     testingInputSize(datasetSmall, rddSmall, "1K")
+  }
+  
+  it should "give same results for 3K dataset" in {
+    val pathMedium = "/Users/yawen/Documents/Scala/dblp_3K.csv"
+    //    val pathMedium = "../dblp_5K.csv"
+    val (datasetMedium, rddMedium) = readResource(pathMedium)
+
+    testingInputSize(datasetMedium, rddMedium, "3K")
+
   }
 
   it should "give same results for 5K dataset" in {
@@ -88,12 +97,12 @@ class Task2Test extends FlatSpec {
     val t1Cartesian = System.nanoTime
     val cartesian = rdd.map(x => (x(attrIndex), x)).cartesian(rdd.map(x => (x(attrIndex), x)))
       .filter(x => (x._1._2(attrIndex).toString() != x._2._2(attrIndex).toString() && sj.edit_distance(x._1._2(attrIndex).toString(), x._2._2(attrIndex).toString()) <= distanceThreshold))
-
+    val cartesianCount = cartesian.count
     val t2Cartesian = System.nanoTime
 
     println("Cluster join count: " + resultSize)
     println("Cluster join time: " + (t2 - t1) / (Math.pow(10, 9)) + "s")
-    println("Cartesian count: " + cartesian.count)
+    println("Cartesian count: " + cartesianCount)
     println("Cartesian join time: " + (t2Cartesian - t1Cartesian) / (Math.pow(10, 9)) + "s")
 
     // Correctness
