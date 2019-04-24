@@ -45,7 +45,7 @@ class SimilarityJoin(numAnchors: Int, distThreshold: Int) extends java.io.Serial
         val joinResult = local_simjoin(partitions)
         joinResult
       })
-    }
+    }.repartition(1)
 //    println(result.count())
 //    result.foreach(x => println(x))
     result

@@ -44,7 +44,14 @@ object Main {
     val resultSize = res.count
     println("Cluster join count: " + resultSize)
     val t2 = System.nanoTime
-    res.foreach(println)
+    
+    val clusterResults = res.map( x=> 
+                                      if (x._1 < x._2)
+                                        (x._1, x._2)
+                                      else
+                                        (x._2, x._1))
+                             .sortBy(line => (line._1, line._2))
+    clusterResults.foreach(x => println(x))
     println()
     println("Cluster join: " + (t2 - t1) / (Math.pow(10, 9)))
 
@@ -55,7 +62,24 @@ object Main {
 
     println("Cartesian count: " + cartesian.count)
     val t2Cartesian = System.nanoTime
-    cartesian.foreach(x => println(x))
+    
+    
+    val cartesianResults = cartesian.asInstanceOf[RDD[((String, Row), (String, Row))]]
+                                    .map( x=> (x._1._1, x._2._1))
+                                    .map( x=> 
+                                            if (x._1 < x._2)
+                                              (x._1, x._2)
+                                            else
+                                              (x._2, x._1)
+                                      ).distinct
+                                      .sortBy(line => (line._1, line._2), ascending = true)
+                                                
+                                        
+                                          
+//    cartesian.foreach(x => println(x))
+//    println()
+        
+    cartesianResults.foreach(x => println(x))
     println()
     println("Cartesian join: " + (t2Cartesian - t1Cartesian) / (Math.pow(10, 9)))
   }
