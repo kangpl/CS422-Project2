@@ -33,7 +33,7 @@ class Task2Test extends FlatSpec {
 
     testingInputSize(datasetSmall, rddSmall, "1K")
   }
-  
+
   it should "give same results for 3K dataset" in {
     val pathMedium = "/Users/yawen/Documents/Scala/dblp_3K.csv"
     //    val pathMedium = "../dblp_5K.csv"
@@ -61,6 +61,27 @@ class Task2Test extends FlatSpec {
 
   }
 
+  // User small dataset for the anchor tests
+  val pathSmall = "/Users/yawen/Documents/Scala/dblp_1k.csv"
+  //    val pathSmall = "../dblp_1k.csv"
+  val (datasetSmall, rddSmall) = readResource(pathSmall)
+
+  "Clusterjoin and Catesian join" should "give same results for 2 anchors" in {
+    testingAnchorSize(datasetSmall, rddSmall, 2)
+  }
+
+  it should "give same results for 4 anchors" in {
+    testingAnchorSize(datasetSmall, rddSmall, 4)
+  }
+
+  it should "give same results for 6 anchors" in {
+    testingAnchorSize(datasetSmall, rddSmall, 6)
+  }
+
+  it should "give same results for 10 anchors" in {
+    testingAnchorSize(datasetSmall, rddSmall, 10)
+  }
+
   // Methods
 
   def readResource(path: String): (Dataset, RDD[Row]) = {
@@ -81,10 +102,8 @@ class Task2Test extends FlatSpec {
     (dataset, rdd)
   }
 
-  def testingInputSize(dataset:Dataset, rdd:RDD[Row], size:String) = {
-    val attrIndex = 0
+  def testingInputSize(dataset: Dataset, rdd: RDD[Row], size: String) = {
     val numAnchors = 4
-    val distanceThreshold = 2
 
     // Cluster join
     val t1 = System.nanoTime
@@ -100,14 +119,44 @@ class Task2Test extends FlatSpec {
     val cartesianCount = cartesian.count
     val t2Cartesian = System.nanoTime
 
+    println("Testing input " + size)
     println("Cluster join count: " + resultSize)
     println("Cluster join time: " + (t2 - t1) / (Math.pow(10, 9)) + "s")
     println("Cartesian count: " + cartesianCount)
     println("Cartesian join time: " + (t2Cartesian - t1Cartesian) / (Math.pow(10, 9)) + "s")
 
+    checkCorrectness(res, cartesian)
+  }
+
+  def testingAnchorSize(dataset: Dataset, rdd: RDD[Row], numAnchors: Int) = {
+    // Cluster join
+    val t1 = System.nanoTime
+    val sj = new SimilarityJoin(numAnchors, distanceThreshold)
+    val res = sj.similarity_join(dataset, attrIndex)
+    val resultSize = res.count
+    val t2 = System.nanoTime
+
+    // cartesian
+    val t1Cartesian = System.nanoTime
+    val cartesian = rdd.map(x => (x(attrIndex), x)).cartesian(rdd.map(x => (x(attrIndex), x)))
+      .filter(x => (x._1._2(attrIndex).toString() != x._2._2(attrIndex).toString() && sj.edit_distance(x._1._2(attrIndex).toString(), x._2._2(attrIndex).toString()) <= distanceThreshold))
+    val cartesianCount = cartesian.count
+    val t2Cartesian = System.nanoTime
+
+    println("Testing with " + numAnchors + " anchors ")
+    println("Cluster join count: " + resultSize)
+    println("Cluster join time: " + (t2 - t1) / (Math.pow(10, 9)) + "s")
+    println("Cartesian count: " + cartesianCount)
+    println("Cartesian join time: " + (t2Cartesian - t1Cartesian) / (Math.pow(10, 9)) + "s")
+
+    checkCorrectness(res, cartesian)
+
+  }
+
+  def checkCorrectness(cluster: RDD[(String, String)], cartesian: RDD[((Any, Row), (Any, Row))]) = {
     // Correctness
     // Sort and check result
-    val clusterResults = res.map(x =>
+    val clusterResults = cluster.map(x =>
       if (x._1 < x._2)
         (x._1, x._2)
       else
@@ -122,16 +171,17 @@ class Task2Test extends FlatSpec {
         else
           (x._2, x._1)).distinct
       .sortBy(line => (line._1, line._2), ascending = true)
-      
-    val diff = cartesianResults.join(clusterResults).collect {
-      case (k, (s1, s2)) if s1 != s2 =>
-        println("Difference: " + k + ": " + s1 + " vs " + s2)
-        (k, s1, s2)
-    }
+
+    val diff = cartesianResults
+      .zip(clusterResults)
+      .collect {
+        case (a, b) if a != b =>
+          println("Difference : " + a + " vs " + b)
+          a -> b
+      }
 
     val diffCount = diff.count()
     assert(diffCount == 0)
-
   }
 
 }
