@@ -53,8 +53,7 @@ class SimilarityJoin(numAnchors: Int, distThreshold: Int) extends java.io.Serial
     
   def local_simjoin(cluster:Iterator[(Int, (String, String))]) : Iterator[(String, String)] = {
     var res = List[(String, String)]()
-    var homelist = List[String]()
-   
+    var homelist = List[String]()  
         
     while(cluster.hasNext) {
       val point = cluster.next
@@ -67,6 +66,7 @@ class SimilarityJoin(numAnchors: Int, distThreshold: Int) extends java.io.Serial
           homelist = homelist :+ point._2._2
       }
     }
+    
     res.iterator
   }
 

@@ -18,10 +18,10 @@ object Main {
     val distanceThreshold = 2
     val attrIndex = 0
 
-    //    val path = "/Users/yawen/Documents/Scala/dblp_small.csv"
-    //    val input = new File(path).getPath
+    val path = "/Users/yawen/Documents/Scala/dblp_small.csv"
+    val input = new File(path).getPath
 
-    val input = new File(getClass.getResource(inputFile).getFile).getPath
+    //    val input = new File(getClass.getResource(inputFile).getFile).getPath
     val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[*]")
     val ctx = new SparkContext(sparkConf)
     val sqlContext = new org.apache.spark.sql.SQLContext(ctx)
@@ -42,19 +42,21 @@ object Main {
     val res = sj.similarity_join(dataset, attrIndex)
 
     val resultSize = res.count
-    println(resultSize)
+    println("Cluster join count: " + resultSize)
     val t2 = System.nanoTime
-
-    println((t2 - t1) / (Math.pow(10, 9)))
+    res.foreach(println)
+    println()
+    println("Cluster join: " + (t2 - t1) / (Math.pow(10, 9)))
 
     // cartesian
     val t1Cartesian = System.nanoTime
     val cartesian = rdd.map(x => (x(attrIndex), x)).cartesian(rdd.map(x => (x(attrIndex), x)))
       .filter(x => (x._1._2(attrIndex).toString() != x._2._2(attrIndex).toString() && sj.edit_distance(x._1._2(attrIndex).toString(), x._2._2(attrIndex).toString()) <= distanceThreshold))
 
-    println(cartesian.count)
-    //    cartesian.foreach(x => println(x))
+    println("Cartesian count: " + cartesian.count)
     val t2Cartesian = System.nanoTime
-    println((t2Cartesian - t1Cartesian) / (Math.pow(10, 9)))
+    cartesian.foreach(x => println(x))
+    println()
+    println("Cartesian join: " + (t2Cartesian - t1Cartesian) / (Math.pow(10, 9)))
   }
 }
