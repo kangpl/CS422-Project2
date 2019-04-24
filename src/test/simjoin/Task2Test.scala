@@ -20,10 +20,6 @@ class Task2Test extends FlatSpec {
   val ctx = new SparkContext(sparkConf)
   val sqlContext = new org.apache.spark.sql.SQLContext(ctx)
 
-  val numAnchors = 4
-  val distanceThreshold = 2
-  val attrIndex = 0
-
   "Clusterjoin and Catesian join" should "give same results for 1k dataset" in {
     // Read in the datasets
     val pathSmall = "/Users/yawen/Documents/Scala/dblp_1k.csv"
@@ -34,52 +30,52 @@ class Task2Test extends FlatSpec {
     testingInputSize(datasetSmall, rddSmall, "1K")
   }
 
-  it should "give same results for 3K dataset" in {
-    val pathMedium = "/Users/yawen/Documents/Scala/dblp_3K.csv"
-    //    val pathMedium = "../dblp_5K.csv"
-    val (datasetMedium, rddMedium) = readResource(pathMedium)
-
-    testingInputSize(datasetMedium, rddMedium, "3K")
-
-  }
-
-  it should "give same results for 5K dataset" in {
-    val pathMedium = "/Users/yawen/Documents/Scala/dblp_5K.csv"
-    //    val pathMedium = "../dblp_5K.csv"
-    val (datasetMedium, rddMedium) = readResource(pathMedium)
-
-    testingInputSize(datasetMedium, rddMedium, "5K")
-
-  }
-
-  it should "give same results for 10K dataset" in {
-    val pathBig = "/Users/yawen/Documents/Scala/dblp_10K.csv"
-    //    val pathBig = "../dblp_10K.csv"
-    val (datasetBig, rddBig) = readResource(pathBig)
-
-    testingInputSize(datasetBig, rddBig, "10K")
-
-  }
+//  it should "give same results for 3K dataset" in {
+//    val pathMedium = "/Users/yawen/Documents/Scala/dblp_3K.csv"
+//    //    val pathMedium = "../dblp_5K.csv"
+//    val (datasetMedium, rddMedium) = readResource(pathMedium)
+//
+//    testingInputSize(datasetMedium, rddMedium, "3K")
+//
+//  }
+//
+//  it should "give same results for 5K dataset" in {
+//    val pathMedium = "/Users/yawen/Documents/Scala/dblp_5K.csv"
+//    //    val pathMedium = "../dblp_5K.csv"
+//    val (datasetMedium, rddMedium) = readResource(pathMedium)
+//
+//    testingInputSize(datasetMedium, rddMedium, "5K")
+//
+//  }
+//
+//  it should "give same results for 10K dataset" in {
+//    val pathBig = "/Users/yawen/Documents/Scala/dblp_10K.csv"
+//    //    val pathBig = "../dblp_10K.csv"
+//    val (datasetBig, rddBig) = readResource(pathBig)
+//
+//    testingInputSize(datasetBig, rddBig, "10K")
+//
+//  }
 
   // User small dataset for the anchor tests
   val pathSmall = "/Users/yawen/Documents/Scala/dblp_1k.csv"
   //    val pathSmall = "../dblp_1k.csv"
   val (datasetSmall, rddSmall) = readResource(pathSmall)
 
-  "Clusterjoin and Catesian join" should "give same results for 2 anchors" in {
-    testingAnchorSize(datasetSmall, rddSmall, 2)
-  }
-
-  it should "give same results for 4 anchors" in {
+  "Clusterjoin and Catesian join" should "give same results for 4 anchors" in {
     testingAnchorSize(datasetSmall, rddSmall, 4)
-  }
-
-  it should "give same results for 6 anchors" in {
-    testingAnchorSize(datasetSmall, rddSmall, 6)
   }
 
   it should "give same results for 10 anchors" in {
     testingAnchorSize(datasetSmall, rddSmall, 10)
+  }
+
+  it should "give same results for 20 anchors" in {
+    testingAnchorSize(datasetSmall, rddSmall, 20)
+  }
+
+  it should "give same results for 50 anchors" in {
+    testingAnchorSize(datasetSmall, rddSmall, 50)
   }
 
   // Methods
@@ -103,8 +99,10 @@ class Task2Test extends FlatSpec {
   }
 
   def testingInputSize(dataset: Dataset, rdd: RDD[Row], size: String) = {
-    val numAnchors = 4
-
+    val numAnchors = 30
+    val distanceThreshold = 2
+    val attrIndex = 0
+    
     // Cluster join
     val t1 = System.nanoTime
     val sj = new SimilarityJoin(numAnchors, distanceThreshold)
@@ -129,6 +127,9 @@ class Task2Test extends FlatSpec {
   }
 
   def testingAnchorSize(dataset: Dataset, rdd: RDD[Row], numAnchors: Int) = {
+    val distanceThreshold = 2
+    val attrIndex = 0
+    
     // Cluster join
     val t1 = System.nanoTime
     val sj = new SimilarityJoin(numAnchors, distanceThreshold)
