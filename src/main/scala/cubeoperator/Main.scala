@@ -1,6 +1,5 @@
 package cubeoperator
 
-import org.scalatest._
 import org.apache.spark.{ SparkConf, SparkContext }
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.expressions._
