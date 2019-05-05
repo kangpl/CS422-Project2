@@ -18,11 +18,11 @@ object Main {
     val distanceThreshold = 2
     val attrIndex = 0
 
-    val path = "/Users/yawen/Documents/Scala/dblp_small.csv"
-    val input = new File(path).getPath
+    //val path = "/Users/yawen/Documents/Scala/dblp_small.csv"
+    //val input = new File(path).getPath
 
     //    val input = new File(getClass.getResource(inputFile).getFile).getPath
-    val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[*]")
+    val sparkConf = new SparkConf().setAppName("CS422-Project2")//.setMaster("local[*]")
     val ctx = new SparkContext(sparkConf)
     val sqlContext = new org.apache.spark.sql.SQLContext(ctx)
 
@@ -31,7 +31,7 @@ object Main {
       .option("header", "true")
       .option("inferSchema", "true")
       .option("delimiter", ",")
-      .load(input)
+      .load(inputFile)
 
     val rdd = df.rdd
     val schema = df.schema.toList.map(x => x.name)
