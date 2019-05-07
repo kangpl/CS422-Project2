@@ -13,7 +13,7 @@ import java.io._
 
 object Main {
   def main(args: Array[String]) {
-    val inputFile = "../dblp_1K.csv"
+    val inputFile = "//user/cs422-group13/data/dblp_1K.csv"
     val numAnchors = 4
     val distanceThreshold = 2
     val attrIndex = 0
