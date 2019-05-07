@@ -30,8 +30,20 @@ object Sampler {
 //    );
     
     // Calculate K
-    
-    
+    /*
+    l_shipdate l_returnflag l_linestatus
+    l_orderkey l_shipdate
+    l_orderkey l_suppkey
+    l_shipdate l_discount l_quantity 
+    l_orderkey l_suppkey l_shipdate l_year
+    l_orderkey l_suppkey l_partkey 
+    l_orderkey l_returnflag
+    l_orderkey l_shipmode l_commitdate l_receiptdate l_shipdate
+    l_partkey l_quantity
+    l_orderkey l_quantity
+    l_partkey l_quantity l_shipmode l_shipinstruct
+    l_partkey l_suppkey l_shipdate
+    */
     null
   }
 }
