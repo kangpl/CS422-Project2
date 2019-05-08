@@ -30,19 +30,19 @@ object Sampler {
 //    );
     
     // Calculate K
-    /*
-    l_shipdate l_returnflag l_linestatus
-    l_orderkey l_shipdate
-    l_orderkey l_suppkey
-    l_shipdate l_discount l_quantity 
-    l_orderkey l_suppkey l_shipdate l_year
-    l_orderkey l_suppkey l_partkey 
-    l_orderkey l_returnflag
-    l_orderkey l_shipmode l_commitdate l_receiptdate l_shipdate
-    l_partkey l_quantity
-    l_orderkey l_quantity
-    l_partkey l_quantity l_shipmode l_shipinstruct
-    l_partkey l_suppkey l_shipdate
+    /*QCS
+    {8, 9, 10} 					l_shipdate l_returnflag l_linestatus
+    {0, 10} 							l_orderkey l_shipdate
+    {0, 2} 							l_orderkey l_suppkey
+    {4, 6, 10} 					l_shipdate l_discount l_quantity 
+    {0, 2, 10} 					l_orderkey l_suppkey l_shipdate
+    {0, 1, 2} 						l_orderkey l_suppkey l_partkey 
+    {0, 8} 							l_orderkey l_returnflag
+    {0, 10, 11, 12, 14} 	l_orderkey l_shipmode l_commitdate l_receiptdate l_shipdate
+    {1, 4} 							l_partkey l_quantity
+    {0, 4} 							l_orderkey l_quantity
+    {1, 4, 13, 14} 				l_partkey l_quantity l_shipmode l_shipinstruct
+    {1, 2, 10}						l_partkey l_suppkey l_shipdate
     */
     null
   }
