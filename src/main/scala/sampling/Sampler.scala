@@ -10,24 +10,23 @@ object Sampler {
     // 0) ORDERKEY, 1) PARTKEY, 2) SUPPKEY, 3) LINENUMBER, 4) QUANTITY, 5) EXTENDEDPRICE, 6) DISCOUNT, 7) TAX, 8) RETURNFLAG, 
     // 9) LINESTATUS, 10) SHIPDATE, 11) COMMITDATE, 12) RECEIPTDATE, 13) SHIPINSTRUCT, 14) SHIPMODE, 15) COMMENT
     
-//     TABLE LINEITEM [6000000:S] (
-//     ORDERKEY      LONG   DISTINCT=1500000:S                               ,
-//     PARTKEY       LONG   DISTINCT=200000:S                                , 
-//     SUPPKEY       LONG   DISTINCT=10000:S                                 ,
-//     LINENUMBER    LONG                                                    ,
-//     QUANTITY      DOUBLE DISTINCT=50       MIN=1.00 MAX=50.0              ,
-//     EXTENDEDPRICE DOUBLE                                                  ,
-//     DISCOUNT      DOUBLE DISTINCT=11	MIN=0.00 MAX=0.10              ,
-//     TAX           DOUBLE                                                  , 
-//     RETURNFLAG    STRING DISTINCT=3                                       ,
-//     LINESTATUS    STRING DISTINCT=2                                       ,
-//     SHIPDATE      DATE   DISTINCT=2518      MIN=1992-01-01 MAX=1998-12-01 ,
-//     COMMITDATE    DATE   DISTINCT=2578      MIN=1992-01-01 MAX=1998-10-31 ,
-//     RECEIPTDATE   DATE   DISTINCT=2548      MIN=1992-01-01 MAX=1998-09-01 ,
-//     SHIPINSTRUCT  STRING DISTINCT=4                                       ,
-//     SHIPMODE      STRING DISTINCT=7                                       ,
-//     COMMENT       STRING
-//    );
+    //Schema:root
+    // |-- l_orderkey: long (nullable = true)
+    // |-- l_partkey: long (nullable = true)
+    // |-- l_suppkey: long (nullable = true)
+    // |-- l_linenumber: integer (nullable = true)
+    // |-- l_quantity: decimal(12,2) (nullable = true)
+    // |-- l_extendedprice: decimal(12,2) (nullable = true)
+    // |-- l_discount: decimal(12,2) (nullable = true)
+    // |-- l_tax: decimal(12,2) (nullable = true)
+    // |-- l_returnflag: string (nullable = true)
+    // |-- l_linestatus: string (nullable = true)
+    // |-- l_shipdate: date (nullable = true)
+    // |-- l_commitdate: date (nullable = true)
+    // |-- l_receiptdate: date (nullable = true)
+    // |-- l_shipinstruct: string (nullable = true)
+    // |-- l_shipmode: string (nullable = true)
+    // |-- l_comment: string (nullable = true)
     
     // Calculate K
     /*QCS
@@ -44,6 +43,11 @@ object Sampler {
     {1, 4, 13, 14} 				l_partkey l_quantity l_shipmode l_shipinstruct
     {1, 2, 10}						l_partkey l_suppkey l_shipdate
     */
+    
+    //
+    
+    
+//    lineitem.groupby("col_
     null
   }
 }
