@@ -6,6 +6,14 @@ import org.apache.spark.sql.DataFrame
 object Sampler {
   def sample(lineitem: DataFrame, storageBudgetBytes: Long, e: Double, ci: Double): (List[RDD[_]], _) = {
     // TODO: implement
+    val schema = lineitem.schema.map(x => x.name)
+//    val QCSs_index = List(List(0,2))
+//    val QCSs = QCSs_index.map(qcs => qcs.map(x => schema(x)))
+    val K = 100
+    val sigma = 0.00005
+    val res = lineitem.groupBy("_c8", "_c9", "_c10").count()
+    res.show(1000)
+    
     
     // 0) ORDERKEY, 1) PARTKEY, 2) SUPPKEY, 3) LINENUMBER, 4) QUANTITY, 5) EXTENDEDPRICE, 6) DISCOUNT, 7) TAX, 8) RETURNFLAG, 
     // 9) LINESTATUS, 10) SHIPDATE, 11) COMMITDATE, 12) RECEIPTDATE, 13) SHIPINSTRUCT, 14) SHIPMODE, 15) COMMENT
