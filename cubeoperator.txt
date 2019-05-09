@@ -1,3 +1,5 @@
+spark-submit --master yarn --class cubeoperator.Main --executor-memory 10g --executor-cores 10 --num-executors 10
+
 MRCube_input_Small's execution time: 1.858875578s
 cubeNaive_input_Small's execution time: 0.436300706s
 MRCube_input_Medium's execution time: 4.542704278s
