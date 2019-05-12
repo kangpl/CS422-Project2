@@ -31,24 +31,6 @@ class CubeOperator(reducers: Int) {
       case _       => rdd.map(row => (index.map(i => row(i)).mkString("_"), row.getInt(indexAgg).toDouble))
     }
 
-    //    val reducedBottomCell = agg match {
-    //      case "AVG" => groupingMap.asInstanceOf[RDD[(String, (Double, Double))]].reduceByKey(avgFunc, reducers)
-    //      case _     => groupingMap.asInstanceOf[RDD[(String, Double)]].reduceByKey(aggFunc(agg), reducers)
-    //    }
-    //
-    //    // begin phase 2 of MRDataCube
-    //    val partialUpperCell = reducedBottomCell.flatMap(
-    //      row => (0 to groupingAttributes.length).toList.flatMap(
-    //        n => row._1.split("-").combinations(n).toList.map(
-    //          part => (part.mkString("-"), row._2))))
-    //
-    //    val reducerFinal: RDD[(String, Double)] = agg match {
-    //      case "AVG" => partialUpperCell.asInstanceOf[RDD[(String, (Double, Double))]].reduceByKey(avgFunc, reducers).mapValues { case (sum, count) => sum / count }
-    //      case _     => partialUpperCell.asInstanceOf[RDD[(String, Double)]].reduceByKey(aggFunc(agg), reducers)
-    //    }
-    //
-    //    reducerFinal
-
     //MRCombine & MRSpreadReduce
     val groupingReduce = agg match {
       case "AVG" => groupingMap.asInstanceOf[RDD[(String, (Double, Double))]].
