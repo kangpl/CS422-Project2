@@ -97,11 +97,11 @@ object Sampler {
       }
     }
     print(magicK)
-    //    val K = 2
-    //    val qcsWithKey = lineitemRdd.map(row => (usefulQcsIndex(0).map(x => row(x)).mkString("_"), row)).groupByKey
-    //    val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x =>ScaSRS(x._2, K))
-    //    print(stratifiedSample.count())
-    //    print(qcsWithKey.keys.distinct.count.toInt)
+//    val K = magicK
+    val qcsWithKey = lineitemRdd.map(row => (usefulQcsIndex(0).map(x => row(x)).mkString("_"), row)).groupByKey
+    val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x =>ScaSRS(x._2, magicK))
+    print(stratifiedSample.count())
+    print(qcsWithKey.keys.distinct.count.toInt)
     null
   }
 
@@ -113,7 +113,7 @@ object Sampler {
     return error
   }
 
-  def ScaSRS(size_stratum: (Int, Iterable[Row]), K: Int): Iterable[Row] = {
+  def ScaSRS(size_stratum: (Int, Iterable[Row]), K: Double): Iterable[Row] = {
     val sigma = 0.00005
     val stratumSize = size_stratum._1
     val stratum = size_stratum._2.toIterator
