@@ -13,29 +13,29 @@ import java.io._
 
 object Main {
   def main(args: Array[String]) {
-    val onCluster = false
+    val onCluster = true
 
     // Spark environment
-    val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[*]")
+    val sparkConf = new SparkConf().setAppName("CS422-Project2")//.setMaster("local[*]")
     val ctx = new SparkContext(sparkConf)
     val sqlContext = new org.apache.spark.sql.SQLContext(ctx)
 
     val pathSmall = "dblp_1k.csv"
     val (datasetSmall, rddSmall) = readResource(pathSmall, onCluster, sqlContext)
 
-    //    val pathMedium = "dblp_3k.csv"
-    //    val (datasetMedium, rddMedium) = readResource(pathMedium, onCluster, sqlContext)
-    //
-    //    val pathMedium2 = "dblp_5k.csv"
-    //    val (datasetMedium2, rddMedium2) = readResource(pathMedium2, onCluster, sqlContext)
-    //
-    //    val pathBig = "dblp_10K.csv"
-    //    val (datasetBig, rddBig) = readResource(pathBig, onCluster)
+    val pathMedium = "dblp_3k.csv"
+    val (datasetMedium, rddMedium) = readResource(pathMedium, onCluster, sqlContext)
+
+    val pathMedium2 = "dblp_5k.csv"
+    val (datasetMedium2, rddMedium2) = readResource(pathMedium2, onCluster, sqlContext)
+
+    val pathBig = "dblp_10k.csv"
+    val (datasetBig, rddBig) = readResource(pathBig, onCluster, sqlContext)
 
     testingInputSize(datasetSmall, rddSmall, "1K")
-//    testingInputSize(datasetMedium, rddMedium, "3K")
-//    testingInputSize(datasetMedium2, rddMedium2, "5K")
-//    testingInputSize(datasetBig, rddBig, "10K")
+    testingInputSize(datasetMedium, rddMedium, "3K")
+    testingInputSize(datasetMedium2, rddMedium2, "5K")
+    testingInputSize(datasetBig, rddBig, "10K")
 
     testingAnchorSize(datasetSmall, rddSmall, 4)
     testingAnchorSize(datasetSmall, rddSmall, 10)
