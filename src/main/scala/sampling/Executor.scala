@@ -1,7 +1,7 @@
 package sampling
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{ DataFrame, SparkSession }
+import org.apache.spark.sql.{ DataFrame, SparkSession, Row }
 import org.apache.spark.sql.functions.count
 import org.apache.spark.sql.functions.sum
 import org.apache.spark.sql.functions.avg
@@ -15,7 +15,17 @@ object Executor {
     val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
     val increase = udf { (x: Double, y: Double) => x * (1 + y) }
 
-    val lineitem = desc.lineitem
+    var lineitem: DataFrame = null
+
+    if (desc.samples.isEmpty) {
+      println("Using whole dataframe")
+      lineitem = desc.lineitem
+      lineitem.show(20)
+    } else {
+      println("Using sample")
+      lineitem = session.createDataFrame(desc.samples(0).asInstanceOf[RDD[Row]], desc.lineitem.schema)
+      lineitem.show(20)
+    }
 
     lineitem.filter($"l_shipdate" <= "1998-09-02")
       .groupBy($"l_returnflag", $"l_linestatus")
