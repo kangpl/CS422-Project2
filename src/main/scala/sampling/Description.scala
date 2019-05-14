@@ -22,5 +22,5 @@ class Description {
   var e : Double = _
   // target confidence level [0, 1]
   var ci: Double = _
-
+  
 }

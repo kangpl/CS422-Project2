@@ -102,7 +102,7 @@ object Sampler {
     val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x =>ScaSRS(x._2, magicK))
     print(stratifiedSample.count())
     print(qcsWithKey.keys.distinct.count.toInt)
-    null
+    (List(stratifiedSample), schema)
   }
 
   def calError(row: Row, K: Double): Double = {

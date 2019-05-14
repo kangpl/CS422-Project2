@@ -9,9 +9,9 @@ import java.io._
 object Main {
   def main(args: Array[String]) {
 
-    //    val conf = new SparkConf().setAppName("app").setMaster("local[*]")
-    //    val sc = SparkContext.getOrCreate()
-    //    val session = SparkSession.builder().getOrCreate();
+        val sparkConf = new SparkConf().setAppName("app").setMaster("local[*]")
+        val sc = SparkContext.getOrCreate(sparkConf)
+        val session = SparkSession.builder().getOrCreate();
     //
     //    val rdd = RandomRDDs.uniformRDD(sc, 100000)
     //    val rdd2 = rdd.map(f => Row.fromSeq(Seq(f * 2, (f*10).toInt)))
@@ -25,9 +25,8 @@ object Main {
 //    val path = "/Users/yawen/Documents/Scala/lineitem.tbl"
 //    val input = new File(path).getPath
     
-    val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
-    val ctx = new SparkContext(sparkConf)
-    val sqlContext:SQLContext = new org.apache.spark.sql.SQLContext(ctx)
+//    val ctx = new SparkContext(sparkConf)
+    val sqlContext:SQLContext = new org.apache.spark.sql.SQLContext(sc)
 
 
 //    val path = "/Users/yawen/Documents/Scala/tpch_parquet_sf1/lineitem.parquet"
@@ -82,13 +81,14 @@ object Main {
     lineitem.printSchema()
 
     val tmp = Sampler.sample(desc_.lineitem, 1000000, desc_.e, desc_.ci)
+    
     //    desc.samples = tmp._1
     //    desc.sampleDescription = tmp._2
     //
     //    // check storage usage for samples
     //
     //    // Execute first query
-    //    Executor.execute_Q1(desc, session, List("3"))
+    Executor.execute_Q1(desc_, session, List("3"))
   }
   
 }
