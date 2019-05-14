@@ -43,6 +43,7 @@ object Sampler {
     val storageBudgetTuples = storageBudgetBytes / rowBytes
 
     // calculate absolute error according to relative error and sum of l_extendedprice
+//    val sumValue = lineitem.agg(functions.sum("l_extendedprice")).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
     val sumValue = lineitem.agg(functions.sum("l_extendedprice")).first.getDouble(0)
     val errorBound = sumValue * e
 
@@ -102,7 +103,7 @@ object Sampler {
     val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x =>ScaSRS(x._2, magicK))
     print(stratifiedSample.count())
     print(qcsWithKey.keys.distinct.count.toInt)
-    (List(stratifiedSample), schema)
+    (List(stratifiedSample), lineitem.schema)
   }
 
   def calError(row: Row, K: Double): Double = {
