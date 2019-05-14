@@ -80,7 +80,8 @@ object Main {
 
     val trueResult = Executor.execute_Q1(desc_, session, List("3"))
 
-    trueResult.rdd.map(println)
+//    trueResult.rdd.collect.map(println)
+    trueResult.show()
 
     println("\n")
 
@@ -94,8 +95,10 @@ object Main {
     //    // check storage usage for samples
     //
     //    // Execute first query
-    val sampleResult = Executor.execute_Q1(desc_, session, List("3"))
-    sampleResult.rdd.map(println)
+    val sampleResult1 = Executor.execute_Q1(desc_, session, List("3"))
+    val sampleResult3 = Executor.execute_Q3(desc_, session, List("BUILDING", "1995-03-15"))
+//    sampleResult.rdd.collect.map(println)
+    sampleResult1.show()
   }
 
 }

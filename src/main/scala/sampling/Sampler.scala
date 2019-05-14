@@ -61,30 +61,30 @@ object Sampler {
     var maxStrataSize = dfAgg.agg(functions.max("count(l_extendedprice)")).first.getLong(0).toDouble
     var magicK = 0.0
 
-    print("original maxStrataSize: ", maxStrataSize)
-    println("original minStrataSize: ", minStrataSize)
+//    print("original maxStrataSize: ", maxStrataSize)
+//    println("original minStrataSize: ", minStrataSize)
 
     var foundMinK = false
 
     while (!foundMinK) {
       var satisfied = false
       var K = scala.math.floor((minStrataSize + maxStrataSize) / 2)
-      print("K: ", K)
+//      print("K: ", K)
       val stratumError = rddNewAgg.map(row => calError(row, K))
       val stratumSum = stratumError.reduce(_ + _)
       val totalError = scala.math.sqrt(stratumSum) * 1.96
-      print("totalError: ", totalError, "errorBound", errorBound)
+//      print("totalError: ", totalError, "errorBound", errorBound)
       if (totalError <= errorBound) {
-        print("Satisfied")
+//        print("Satisfied")
         maxStrataSize = K
         satisfied = true
       } else {
         minStrataSize = K + 1
-        print("Not satisfied")
+//        print("Not satisfied")
       }
 
-      print("maxStrataSize: ", maxStrataSize)
-      println("minStrataSize: ", minStrataSize)
+//      print("maxStrataSize: ", maxStrataSize)
+//      println("minStrataSize: ", minStrataSize)
 
       if ((maxStrataSize == minStrataSize) && satisfied) {
         magicK = K
@@ -100,7 +100,7 @@ object Sampler {
     print(magicK)
 //    val K = magicK
     val qcsWithKey = lineitemRdd.map(row => (usefulQcsIndex(0).map(x => row(x)).mkString("_"), row)).groupByKey
-    val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x =>ScaSRS(x._2, magicK))
+    val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x =>ScaSRS(x._2,200))
     print(stratifiedSample.count())
     print(qcsWithKey.keys.distinct.count.toInt)
     (List(stratifiedSample), lineitem.schema)
