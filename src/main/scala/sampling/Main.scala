@@ -9,7 +9,7 @@ import java.io._
 object Main {
   def main(args: Array[String]) {
 
-    val sparkConf = new SparkConf().setAppName("app").setMaster("local[*]")
+    val sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
     val sc = SparkContext.getOrCreate(sparkConf)
     val session = SparkSession.builder().getOrCreate();
     //
@@ -25,7 +25,7 @@ object Main {
 //    val path = "/Users/yawen/Documents/Scala/lineitem.tbl"
 //    val input = new File(path).getPath
 
-    //    val ctx = new SparkContext(sparkConf)
+//    val ctx = new SparkContext(sparkConf)
     val sqlContext: SQLContext = new org.apache.spark.sql.SQLContext(sc)
 
     //    val path = "/Users/yawen/Documents/Scala/tpch_parquet_sf1/lineitem.parquet"
@@ -77,10 +77,11 @@ object Main {
     desc_.ci = 0.95
     //    lineitem.show(5)
     //    lineitem.printSchema()
+    
 
     val trueResult = Executor.execute_Q1(desc_, session, List("3"))
 
-//    trueResult.rdd.collect.map(println)
+
     trueResult.show()
 
     println("\n")
@@ -99,6 +100,7 @@ object Main {
     val sampleResult3 = Executor.execute_Q3(desc_, session, List("BUILDING", "1995-03-15"))
 //    sampleResult.rdd.collect.map(println)
     sampleResult1.show()
+
   }
 
 }

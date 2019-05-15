@@ -12,6 +12,7 @@ object Sampler {
   def sample(lineitem: DataFrame, storageBudgetBytes: Long, e: Double, ci: Double): (List[RDD[_]], _) = {
     // TODO: implement
     val schema = lineitem.schema.map(x => x.name)
+    val aggColumn = "l_quantity"
 
     // total query column sets appear in TPC-H queries
     val totalQcs = List(
@@ -36,15 +37,14 @@ object Sampler {
       List("l_orderkey", "l_returnflag"), //List(0, 8)              //34.49%  ///
       List("l_partkey", "l_quantity")) //List(1, 4)              //75.18%  ///
     val usefulQcsIndex = usefulQcs.map(qcs => qcs.map(q => schema.indexOf(q)))
-    val attrIndex = schema.indexOf("l_extendedprice")
+    val attrIndex = schema.indexOf(aggColumn)
 
     // according datatype to estimate the storage space of one tuple
     val rowBytes = lineitem.schema.map(x => x.dataType.defaultSize).reduce((a, b) => a + b)
     val storageBudgetTuples = storageBudgetBytes / rowBytes
 
     // calculate absolute error according to relative error and sum of l_extendedprice
-//    val sumValue = lineitem.agg(functions.sum("l_extendedprice")).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
-    val sumValue = lineitem.agg(functions.sum("l_extendedprice")).first.getDouble(0)
+    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
     val errorBound = sumValue * e
 
     //    val lineitemRdd = ctx.parallelize(lineitem.take(100000))
@@ -52,13 +52,13 @@ object Sampler {
 
     //calculate minimum k for each query column set
     val dfAgg = lineitem.groupBy("l_returnflag", "l_linestatus", "l_shipdate")
-      .agg(functions.count("l_extendedprice"), functions.var_pop("l_extendedprice"))
-      .select("count(l_extendedprice)", "var_pop(l_extendedprice)")
+      .agg(functions.count(aggColumn), functions.var_pop(aggColumn))
+      .select("count(" + aggColumn + ")", "var_pop(" + aggColumn + ")")
     val rddAgg = dfAgg.rdd
     val rddNewAgg = rddAgg.map(row => Row(row.getLong(0).toDouble, row.getDouble(1)))
 
     var minStrataSize = 1.0
-    var maxStrataSize = dfAgg.agg(functions.max("count(l_extendedprice)")).first.getLong(0).toDouble
+    var maxStrataSize = dfAgg.agg(functions.max("count(" + aggColumn + ")")).first.getLong(0).toDouble
     var magicK = 0.0
 
 //    print("original maxStrataSize: ", maxStrataSize)
@@ -98,12 +98,12 @@ object Sampler {
       }
     }
     print(magicK)
-//    val K = magicK
+    //    val K = magicK
     val qcsWithKey = lineitemRdd.map(row => (usefulQcsIndex(0).map(x => row(x)).mkString("_"), row)).groupByKey
-    val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x =>ScaSRS(x._2,200))
+    val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x => ScaSRS(x._2, magicK))
     print(stratifiedSample.count())
     print(qcsWithKey.keys.distinct.count.toInt)
-    (List(stratifiedSample), lineitem.schema)
+    (List(stratifiedSample), lineitem.count().toDouble / stratifiedSample.count().toDouble)
   }
 
   def calError(row: Row, K: Double): Double = {
