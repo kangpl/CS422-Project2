@@ -30,23 +30,24 @@ object Executor {
       }
     }
 
-    print("date: " + date + " ; final date: " + returnDate)
+    println("date: " + date + " ; final date: " + returnDate)
     returnDate
   }
 
   def get_sample(desc: Description, query: String): RDD[Row] = {
-    
-    if (desc.samples == null) 
-      null
-    
-    val description: List[String] = desc.sampleDescription.asInstanceOf[List[String]]
 
-    val sampleIndex = description.indexOf(query)
-
-    if (sampleIndex == -1) {
+    if (desc.samples == null)
       null
-    } else {
-      desc.samples(sampleIndex).asInstanceOf[RDD[Row]]
+    else {
+      val description: List[String] = desc.sampleDescription.asInstanceOf[List[String]]
+
+      val sampleIndex = description.indexOf(query)
+
+      if (sampleIndex == -1) {
+        null
+      } else {
+        desc.samples(sampleIndex).asInstanceOf[RDD[Row]]
+      }
     }
 
   }
@@ -129,7 +130,7 @@ object Executor {
 
     val rname: String = params(0).toString()
     val firstDate: String = params(1).toString()
-    val secondDate = calcDate(firstDate, "year", 1, false)
+    val secondDate = calcDate(firstDate, "year", 1, true)
 
     val orderFilter = desc.orders.filter($"o_orderdate" < firstDate && $"o_orderdate" >= secondDate)
     val regionFilter = desc.region.filter($"r_name" === rname)
@@ -142,11 +143,11 @@ object Executor {
     val where2_ = where_.join(orderFilter, $"l_orderkey" === orderFilter("o_orderkey"))
       .join(desc.customer, $"o_custkey" === desc.customer("c_custkey") && $"s_nationkey" === desc.customer("c_nationkey"))
 
-    val select_ = where2_.select($"n_name", decrease($"l_extendedprice", $"l_discount").as("revenue"))
+    val select_ = where2_.select($"n_name", decrease($"l_extendedprice", $"l_discount").as("part_revenue"))
 
     val grBy_ = select_.groupBy($"n_name")
 
-    grBy_.agg(sum($"value").as("revenue")).sort($"revenue".desc)
+    grBy_.agg(sum($"part_revenue").as("revenue")).sort($"revenue".desc)
   }
 
   def execute_Q6(desc: Description, session: SparkSession, params: List[Any]) = {
@@ -161,17 +162,16 @@ object Executor {
     } else {
       println("Using sample")
       lineitem = session.createDataFrame(sample, desc.lineitem.schema)
-      //      lineitem.show(20)
     }
 
     val firstDate: String = params(0).toString()
     val secondDate: String = calcDate(firstDate, "year", 1, false)
 
-    val givenDiscount: Double = params(1).toString().toDouble
-    val firstDiscount = givenDiscount - 0.01
-    val secondDiscount = givenDiscount + 0.01
+    val givenDiscount: Double = Math.round(params(1).toString().toDouble * 100) / 100.0
+    val firstDiscount = Math.round((givenDiscount - 0.01) * 100) / 100.0
+    val secondDiscount = Math.round((givenDiscount + 0.01) * 100) / 100.0
 
-    val givenQuantity: Long = params(2).toString.toLong
+    val givenQuantity: Int = params(2).toString.toInt
 
     lineitem.filter(
       $"l_shipdate" >= firstDate && $"l_shipdate" < secondDate &&
@@ -420,8 +420,9 @@ object Executor {
       .agg(sum($"l_quantity").as("sum_quantity"))
       .filter($"sum_quantity" > sum_quantity)
 
-    val where_ = subQuery.select($"l_orderkey", $"sum_quantity")
-      .join(order, order("o_orderkey") === $"l_orderkey")
+    val where_ = subQuery.select($"l_orderkey".as("orderkey"), $"sum_quantity")
+      .join(order, order("o_orderkey") === $"orderkey")
+      .join(lineitem, $"o_orderkey" === lineitem("l_orderkey"))
       .join(customer, $"o_custkey" === customer("c_custkey"))
 
     val select_ = where_.select($"c_name", $"c_custkey",
@@ -432,18 +433,6 @@ object Executor {
       $"o_orderdate", $"o_totalprice").agg(sum("l_quantity"))
 
     grBy_.sort($"o_totalprice".desc, $"o_orderdate").limit(100)
-    //    lineitem.groupBy($"l_orderkey")
-    //      .agg(sum($"l_quantity").as("sum_quantity"))
-    //      .filter($"sum_quantity" > 300)
-    //      .select($"l_orderkey".as("key"), $"sum_quantity")
-    //      .join(order, order("o_orderkey") === $"key")
-    //      .join(lineitem, $"o_orderkey" === lineitem("l_orderkey"))
-    //      .join(customer, customer("c_custkey") === $"o_custkey")
-    //      .select($"l_quantity", $"c_name", $"c_custkey", $"o_orderkey", $"o_orderdate", $"o_totalprice")
-    //      .groupBy($"c_name", $"c_custkey", $"o_orderkey", $"o_orderdate", $"o_totalprice")
-    //      .agg(sum("l_quantity"))
-    //      .sort($"o_totalprice".desc, $"o_orderdate")
-    //      .limit(100)
   }
 
   def execute_Q19(desc: Description, session: SparkSession, params: List[Any]) = {
@@ -470,46 +459,26 @@ object Executor {
     val p_brand3: String = params(2).toString()
     val l_quantity31: Int = params(5).toString().toInt
     val l_quantity32: Int = l_quantity31 + 10
-        
-    val baseQuery = part.join(lineitem, $"l_partkey" === $"p_partkey")
-                        .filter(($"l_shipmode" === "AIR" || $"l_shipmode" === "AIR REG") &&
-                                 $"l_shipinstruct" === "DELIVER IN PERSON")
-    
-    val filter1 = ($"p_brand" === p_brand1) && f1($"p_container") && 
-                  ($"l_quantity" >= l_quantity11) && ($"l_quantity" <= l_quantity12) && 
-                  ($"p_size" >= 1 && $"p_size" <= 5)
-    val filter2 =  ($"p_brand" === p_brand2) && f2($"p_container") && 
-                   ($"l_quantity" >= l_quantity21) && ($"l_quantity" <= l_quantity22) && 
-                   ($"p_size" >= 1 && $"p_size" <= 10)
-    val filter3 = ($"p_brand" === p_brand3) && f3($"p_container") && 
-                  ($"l_quantity" >= l_quantity31) && ($"l_quantity" <= l_quantity32) &&
-                  ($"p_size" >= 1 && $"p_size" <= 15)
-    
-    val filters = baseQuery.filter(filter1 || filter2 || filter3) 
-    
-    val select_ = filters.select(decrease($"l_extendedprice", $"l_discount").as("part_revenue"))
-    
-    select_.agg(sum($"part_revenue").as("revenue"))
 
-//    // project part and lineitem first?
-//    part.join(lineitem, $"l_partkey" === $"p_partkey")
-//      .filter(($"l_shipmode" === "AIR" || $"l_shipmode" === "AIR REG") &&
-//        $"l_shipinstruct" === "DELIVER IN PERSON")
-//      .filter(
-//        (($"p_brand" === "Brand#12") &&
-//          sm($"p_container") &&
-//          $"l_quantity" >= 1 && $"l_quantity" <= 11 &&
-//          $"p_size" >= 1 && $"p_size" <= 5) ||
-//          (($"p_brand" === "Brand#23") &&
-//            md($"p_container") &&
-//            $"l_quantity" >= 10 && $"l_quantity" <= 20 &&
-//            $"p_size" >= 1 && $"p_size" <= 10) ||
-//            (($"p_brand" === "Brand#34") &&
-//              lg($"p_container") &&
-//              $"l_quantity" >= 20 && $"l_quantity" <= 30 &&
-//              $"p_size" >= 1 && $"p_size" <= 15))
-//      .select(decrease($"l_extendedprice", $"l_discount").as("volume"))
-//      .agg(sum("volume"))
+    val baseQuery = part.join(lineitem, $"l_partkey" === $"p_partkey")
+      .filter(($"l_shipmode" === "AIR" || $"l_shipmode" === "AIR REG") &&
+        $"l_shipinstruct" === "DELIVER IN PERSON")
+
+    val filter1 = ($"p_brand" === p_brand1) && f1($"p_container") &&
+      ($"l_quantity" >= l_quantity11) && ($"l_quantity" <= l_quantity12) &&
+      ($"p_size" >= 1 && $"p_size" <= 5)
+    val filter2 = ($"p_brand" === p_brand2) && f2($"p_container") &&
+      ($"l_quantity" >= l_quantity21) && ($"l_quantity" <= l_quantity22) &&
+      ($"p_size" >= 1 && $"p_size" <= 10)
+    val filter3 = ($"p_brand" === p_brand3) && f3($"p_container") &&
+      ($"l_quantity" >= l_quantity31) && ($"l_quantity" <= l_quantity32) &&
+      ($"p_size" >= 1 && $"p_size" <= 15)
+
+    val filters = baseQuery.filter(filter1 || filter2 || filter3)
+
+    val select_ = filters.select(decrease($"l_extendedprice", $"l_discount").as("part_revenue"))
+
+    select_.agg(sum($"part_revenue").as("revenue"))
   }
 
   def execute_Q20(desc: Description, session: SparkSession, params: List[Any]) = {
@@ -520,52 +489,34 @@ object Executor {
     val partsupp = desc.partsupp
     val supplier = desc.supplier
     val part = desc.part
-    
+
     val p_name: String = params(0).toString()
     val firstDate: String = params(1).toString()
     val secondDate: String = calcDate(firstDate, "year", 1, false)
     val n_name: String = params(2).toString()
 
     val pnameFilter = udf { (x: String) => x.startsWith(p_name) }
-    
-    val ps_availqtySubQuery = lineitem.filter($"l_shipdate" >= firstDate && $"l_shipdate" < secondDate)
-                                      .groupBy($"l_partkey", $"l_suppkey")
-                                      .agg((sum($"l_quantity") * 0.5).as("sum_quantity"))
-    
-    val ps_partkeySubQuery = part.filter( pnameFilter($"p_name"))
-                                 .select($"p_partkey").distinct    
-                                 
-    val s_suppkeySubQuery = ps_partkeySubQuery.join(partsupp, $"p_partkey" === partsupp("ps_partkey"))
-                                              .join(ps_availqtySubQuery, $"ps_suppkey" === ps_availqtySubQuery("l_suppkey") && 
-                                                    $"ps_partkey" === ps_availqtySubQuery("l_partkey"))
-                                              .filter($"ps_availqty" > $"sum_quantity")
-                                              .select($"ps_suppkey").distinct
-                                              
-    val query = nation.filter($"n_name" === n_name)
-                      .join(supplier, supplier("s_nationkey") === "n_nationkey")
-                      .select($"s_suppkey", $"s_name", $"s_address")
-    
-    s_suppkeySubQuery.join(query, $"ps_suppkey" === query("s_suppkey"))
-                     .select($"s_name", $"s_address")
-                     .sort($"s_name")
+    val nationFilter = nation.filter($"n_name" === n_name)
 
-//    val flineitem = lineitem.filter($"l_shipdate" >= "1994-01-01" && $"l_shipdate" < "1995-01-01")
-//      .groupBy($"l_partkey", $"l_suppkey")
-//      .agg((sum($"l_quantity") * 0.5).as("sum_quantity"))
-//
-//    val fnation = nation.filter($"n_name" === "CANADA")
-//    val nat_supp = supplier.select($"s_suppkey", $"s_name", $"s_nationkey", $"s_address")
-//      .join(fnation, $"s_nationkey" === fnation("n_nationkey"))
-//
-//    part.filter(pnameFilter($"p_name"))
-//      .select($"p_partkey").distinct
-//      .join(partsupp, $"p_partkey" === partsupp("ps_partkey"))
-//      .join(flineitem, $"ps_suppkey" === flineitem("l_suppkey") && $"ps_partkey" === flineitem("l_partkey"))
-//      .filter($"ps_availqty" > $"sum_quantity")
-//      .select($"ps_suppkey").distinct
-//      .join(nat_supp, $"ps_suppkey" === nat_supp("s_suppkey"))
-//      .select($"s_name", $"s_address")
-//      .sort($"s_name")
+    val ps_availqtySubQuery = lineitem.filter($"l_shipdate" >= firstDate && $"l_shipdate" < secondDate)
+      .groupBy($"l_partkey", $"l_suppkey")
+      .agg((sum($"l_quantity") * 0.5).as("sum_quantity"))
+
+    val ps_partkeySubQuery = part.filter(pnameFilter($"p_name"))
+      .select($"p_partkey").distinct
+
+    val s_suppkeySubQuery = ps_partkeySubQuery.join(partsupp, $"p_partkey" === partsupp("ps_partkey"))
+      .join(ps_availqtySubQuery, $"ps_suppkey" === ps_availqtySubQuery("l_suppkey") &&
+        $"ps_partkey" === ps_availqtySubQuery("l_partkey"))
+      .filter($"ps_availqty" > $"sum_quantity")
+      .select($"ps_suppkey").distinct
+
+    val query = supplier.select($"s_suppkey", $"s_name", $"s_nationkey", $"s_address")
+      .join(nationFilter, $"s_nationkey" === nationFilter("n_nationkey"))
+
+    s_suppkeySubQuery.join(query, $"ps_suppkey" === query("s_suppkey"))
+      .select($"s_name", $"s_address")
+      .sort($"s_name")
 
   }
 }
