@@ -1,0 +1,55 @@
+(size: ,9629)Testing input 1K
+Cluster join count: 206
+Cluster join time: 2.93952493s
+Cartesian count: 206
+Cartesian join time: 16.798617353s
+Difference count: 0
+
+(size: ,31228)Testing input 3K
+Cluster join count: 1310
+Cluster join time: 9.167547818s
+Cartesian count: 1310
+Cartesian join time: 119.586174477s
+Difference count: 0
+
+(size: ,39378)Testing input 5K
+Cluster join count: 2036
+Cluster join time: 30.248495827s
+Cartesian count: 2036
+Cartesian join time: 294.724737285s
+Difference count: 0
+
+(size: ,84763)Testing input 10K
+Cluster join count: 3944
+Cluster join time: 68.81123638s
+Cartesian count: 3944
+Cartesian join time: 1885.261539858s
+Difference count: 0
+
+(size: ,1625)Testing with 4 anchors 
+Cluster join count: 206
+Cluster join time: 4.749865487s
+Cartesian count: 206
+Cartesian join time: 14.878065871s
+Difference count: 0
+
+(size: ,3936)Testing with 10 anchors 
+Cluster join count: 206
+Cluster join time: 2.10840728s
+Cartesian count: 206
+Cartesian join time: 15.849023241s
+Difference count: 0
+
+(size: ,7511)Testing with 20 anchors 
+Cluster join count: 206
+Cluster join time: 1.860997039s
+Cartesian count: 206
+Cartesian join time: 15.997549568s
+Difference count: 0
+
+(size: ,13733)Testing with 50 anchors 
+Cluster join count: 206
+Cluster join time: 1.948690037s
+Cartesian count: 206
+Cartesian join time: 13.980250213s
+Difference count: 0
