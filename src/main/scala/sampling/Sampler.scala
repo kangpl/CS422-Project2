@@ -56,11 +56,11 @@ object Sampler {
     // according datatype to estimate the storage space of one tuple
     val rowBytes = lineitem.schema.map(x => x.dataType.defaultSize).reduce((a, b) => a + b)
     var storageBudgetTuples = storageBudgetBytes / rowBytes
-    println("the # tuples can be stored: ", storageBudgetTuples)
+    println("# tuples can be stored: ", storageBudgetTuples)
 
     // calculate absolute error according to relative error and sum of l_extendedprice
-    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
-    //    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
+//    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
+    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
     val errorBound = sumValue * e
 
     var haveStorageBudget = true
@@ -72,41 +72,48 @@ object Sampler {
       val dfAgg = lineitem.groupBy(usefulQcs(i)(0).head, usefulQcs(i)(0).tail: _*)
         .agg(functions.count(aggColumn), functions.var_pop(aggColumn))
         .select("count(" + aggColumn + ")", "var_pop(" + aggColumn + ")")
-      //      dfAgg.show()
 
       //calculate magicK for specific qcs
-      val magicK = magicKSearch(dfAgg, aggColumn, z, errorBound)
-
-      // do scalable simple random sampling
-      val lineitemRdd = lineitem.rdd
-      val qcsWithKey = lineitemRdd.map(row => (usefulQcsIndex(i).map(x => row(x)).mkString("_"), row)).groupByKey
-      val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x => ScaSRS(x._2, magicK))
-      val sampleSize = stratifiedSample.count
-
-      println("stratified sample size: ", sampleSize)
-      println("# groups:", qcsWithKey.keys.distinct.count.toInt)
-
+      val magicK_samplesize = magicKSearch(dfAgg, aggColumn, z, errorBound)
+      val magicK = magicK_samplesize._1
+      val sampleSize = magicK_samplesize._2
+      print("\nthis is the final magick: ", magicK, "eatimate sample size: ", sampleSize)
+      
       //check whether have storage budget
       if (sampleSize < storageBudgetTuples) {
-        storageBudgetTuples = storageBudgetTuples - sampleSize
-        stratifiedSampleList = stratifiedSampleList :+ stratifiedSample
-        qcsIndicator = qcsIndicator ++ usefulQcs(i)(1)
-        println("remained# tuples can be stored: ", storageBudgetTuples)
+        storageBudgetTuples = storageBudgetTuples - sampleSize.toLong
+        println("\nremained # tuples can be stored: ", storageBudgetTuples)
       } else {
+        print("not have enough storage budget")
         haveStorageBudget = false
       }
-      i += 1
+      
+      if(haveStorageBudget){
+        // do scalable simple random sampling
+        val lineitemRdd = lineitem.rdd
+        
+        val qcsWithKey = lineitemRdd.map(row => (usefulQcsIndex(i).map(x => row(x)).mkString("_"), row)).groupByKey
+        val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x => ScaSRS(x._2, magicK))
+  
+        println("real stratified sample size: ", stratifiedSample.count)
+        println("# groups:", qcsWithKey.keys.distinct.count.toInt)
+        
+        stratifiedSampleList = stratifiedSampleList :+ stratifiedSample
+        qcsIndicator = qcsIndicator ++ usefulQcs(i)(1)
+        i += 1
+      }
     }
-    print(qcsIndicator)
+    print("\nsampled qcs: ", qcsIndicator)
     (stratifiedSampleList, qcsIndicator)
   }
 
-  def magicKSearch(dfAgg: DataFrame, aggColumn: String, z: Double, errorBound: Double): Double = {
+  def magicKSearch(dfAgg: DataFrame, aggColumn: String, z: Double, errorBound: Double): (Double, Double) = {
     var minStrataSize = 2.0
     var maxStrataSize = dfAgg.agg(functions.max("count(" + aggColumn + ")")).first.getLong(0).toDouble
     val rddNewAgg = dfAgg.rdd.map(row => Row(row.getLong(0).toDouble, row.getDouble(1)))
     var magicK = 0.0
-
+    var sampleSize = 0.0
+    
     var foundMinK = false
 
     while (!foundMinK) {
@@ -117,7 +124,7 @@ object Sampler {
       print("minStrataSize: ", minStrataSize)
       print("K: ", K)
 
-      val estimateVar = rddNewAgg.map(row => calSizeTimesVar(row, K)).reduce(_ + _)
+      val estimateVar = rddNewAgg.map(row => calSizeTimesVar(row, K)).reduce(_+_)
       val estimateError = scala.math.sqrt(estimateVar) * z
       print("estimateError: ", estimateError, "  defined errorBound", errorBound)
       if (estimateError <= errorBound) {
@@ -132,29 +139,38 @@ object Sampler {
       if ((maxStrataSize == minStrataSize) && satisfied) {
         magicK = K
         foundMinK = true
+        sampleSize = rddNewAgg.map(row => calSize(row, magicK)).reduce(_+_)
       }
 
       // avoid loop
       if ((maxStrataSize < minStrataSize) && !satisfied) {
         magicK = maxStrataSize
         foundMinK = true
+        sampleSize = rddNewAgg.map(row => calSize(row, magicK)).reduce(_+_)
       }
 
       if ((maxStrataSize < minStrataSize) && satisfied) {
         magicK = minStrataSize
         foundMinK = true
+        sampleSize = rddNewAgg.map(row => calSize(row, magicK)).reduce(_+_)
       }
     }
-    println("\nthis is the final magick: ", magicK)
-    return magicK
+    return (magicK, sampleSize)
   }
 
   def calSizeTimesVar(row: Row, K: Double): Double = {
-    var sampleSize = K
+    var stratumsampleSize = K
     val stratumSize = row.getDouble(0)
-    if (stratumSize < K) sampleSize = stratumSize
-    val error = scala.math.pow(stratumSize, 2) * row.getDouble(1) / sampleSize
+    if (stratumSize < K) stratumsampleSize = stratumSize
+    val error = scala.math.pow(stratumSize, 2) * row.getDouble(1) / stratumsampleSize
     return error
+  }
+  
+  def calSize(row: Row, K: Double): Double = {
+    var stratumsampleSize = K
+    val stratumSize = row.getDouble(0)
+    if (stratumSize < K) stratumsampleSize = stratumSize
+    return stratumsampleSize
   }
 
   def ScaSRS(size_stratum: (Int, Iterable[Row]), K: Double): Iterable[Row] = {
