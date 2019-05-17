@@ -46,11 +46,11 @@ object Sampler {
 
     // useful query column sets after hardcode
     val usefulQcs = List(
-      List("l_returnflag", "l_linestatus", "l_shipdate"), //List(8, 9, 10)          //0.64%   /// Q1
-      List("l_orderkey", "l_returnflag"), //List(0, 8)              //34.49%  /// Q10
-      List("l_partkey", "l_quantity"), //List(1, 4)              //75.18%  /// Q12
-      List("l_quantity", "l_discount", "l_shipdate")) //List(4, 6, 10)          //80.64%  /// Q6
-    val usefulQcsIndex = usefulQcs.map(qcs => qcs.map(q => schema.indexOf(q)))
+      List(List("l_returnflag", "l_linestatus", "l_shipdate"), List("Q1")),           //List(8, 9, 10)          //0.64%   /// Q1
+      List(List("l_orderkey", "l_returnflag"), List("Q10")),                          //List(0, 8)              //34.49%  /// Q10
+      List(List("l_partkey", "l_quantity"), List("Q12")),                             //List(1, 4)              //75.18%  /// Q12
+      List(List("l_quantity", "l_discount", "l_shipdate"), List("Q6")))               //List(4, 6, 10)          //80.64%  /// Q6
+    val usefulQcsIndex = usefulQcs.map(qcs => qcs(0).map(q => schema.indexOf(q)))
     val attrIndex = schema.indexOf(aggColumn)
 
     // according datatype to estimate the storage space of one tuple
@@ -66,9 +66,10 @@ object Sampler {
     var haveStorageBudget = true
     i = 0
     var stratifiedSampleList = List[RDD[Row]]()
+    var qcsIndicator = List[String]()
     while (i < usefulQcs.size && haveStorageBudget) {
       //get each stratum size and variance for specific qcs
-      val dfAgg = lineitem.groupBy(usefulQcs(i).head, usefulQcs(i).tail: _*)
+      val dfAgg = lineitem.groupBy(usefulQcs(i)(0).head, usefulQcs(i)(0).tail: _*)
         .agg(functions.count(aggColumn), functions.var_pop(aggColumn))
         .select("count(" + aggColumn + ")", "var_pop(" + aggColumn + ")")
       //      dfAgg.show()
@@ -89,14 +90,15 @@ object Sampler {
       if (sampleSize < storageBudgetTuples) {
         storageBudgetTuples = storageBudgetTuples - sampleSize
         stratifiedSampleList = stratifiedSampleList :+ stratifiedSample
+        qcsIndicator = qcsIndicator ++ usefulQcs(i)(1)
         println("remained# tuples can be stored: ", storageBudgetTuples)
       } else {
         haveStorageBudget = false
       }
       i += 1
     }
-
-    (stratifiedSampleList, null)
+    print(qcsIndicator)
+    (stratifiedSampleList, qcsIndicator)
   }
 
   def magicKSearch(dfAgg: DataFrame, aggColumn: String, z: Double, errorBound: Double): Double = {
