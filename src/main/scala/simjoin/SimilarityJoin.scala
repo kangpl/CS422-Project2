@@ -72,31 +72,9 @@ class SimilarityJoin(numAnchors: Int, distThreshold: Int) extends java.io.Serial
     res.iterator
   }
 
-//  def edit_distance(val1: String, val2: String): Int = {
-//
-//    val lenStr1 = val1.length
-//    val lenStr2 = val2.length
-//
-//    val d: Array[Array[Int]] = Array.ofDim(lenStr1 + 1, lenStr2 + 1)
-//
-//    for (i <- 0 to lenStr1) d(i)(0) = i
-//    for (j <- 0 to lenStr2) d(0)(j) = j
-//
-//    for (i <- 1 to lenStr1; j <- 1 to lenStr2) {
-//      val cost = if (val1(i - 1) == val2(j - 1)) 0 else 1
-//
-//      d(i)(j) = List(
-//        d(i - 1)(j) + 1, // deletion
-//        d(i)(j - 1) + 1, // insertion
-//        d(i - 1)(j - 1) + cost // substitution
-//      ).min
-//    }
-//
-//    d(lenStr1)(lenStr2)
-//  }
-  def edit_distance(s1: String, s2: String): Int = {
-//    val distance = Array.tabulate(s1.length + 1, s2.length + 1) { (j, i) => if (j == 0) i else if (i == 0) j else 0 }
-            
+
+  // Code inspired from Rosetta Stone
+  def edit_distance(s1: String, s2: String): Int = {            
     val dist = Array.tabulate(s2.length + 1, s1.length + 1) { (j, i) => if (j == 0) i else if (i == 0) j else 0 }
    
       @inline

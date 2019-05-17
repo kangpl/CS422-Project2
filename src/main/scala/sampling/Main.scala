@@ -9,7 +9,7 @@ import java.io._
 object Main {
   def main(args: Array[String]) {
 
-    val onCluster = false
+    val onCluster = true
     var sparkConf: SparkConf = null
     var path = ""
 
