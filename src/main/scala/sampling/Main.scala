@@ -98,7 +98,7 @@ object Main {
 
 //    println("\n")
 
-    val tmp = Sampler.sample(desc_.lineitem, 1000000, desc_.e, desc_.ci)
+    val tmp = Sampler.sample(desc_.lineitem, 600000000, desc_.e, desc_.ci)
 
     
 //    var desc2 = new Description
