@@ -6,37 +6,68 @@ import org.apache.spark.sql.functions.count
 import org.apache.spark.sql.functions.sum
 import org.apache.spark.sql.functions.avg
 import org.apache.spark.sql.functions.udf
+import java.time._
+import java.time.format._
 
-object Executor {
+object Executor {  
+
+  def calcDate(date: String, dateType: String, interval: Long, minus: Boolean): String = {
+    val toDate = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val initialDate = LocalDate.parse(date, toDate)
+    var returnDate = ""
+
+    if (minus) {
+      dateType match {
+        case "day" => returnDate = initialDate.minusDays(interval).toString()
+        case "month" =>returnDate = initialDate.minusMonths(interval).toString()
+        case "year" => returnDate = initialDate.minusYears(interval).toString()
+      }
+    } else {
+      dateType match {
+        case "day" => returnDate = initialDate.plusDays(interval).toString()
+        case "month" =>returnDate = initialDate.plusMonths(interval).toString()
+        case "year" => returnDate = initialDate.plusYears(interval).toString()
+      }
+    }
+
+    print("date: " + date + " ; final date: " + returnDate)
+    returnDate
+  }
+
   def execute_Q1(desc: Description, session: SparkSession, params: List[Any]) = {
 
     import session.implicits._
 
-    val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
-    val increase = udf { (x: Double, y: Double) => x * (1 + y) }
-
     var lineitem: DataFrame = null
-//    var proportion = 1.0
-    //    var returnValue = _
+    var proportion = 1.0
 
     if (desc.samples == null) {
       println("Using whole dataframe")
       lineitem = desc.lineitem
-//      lineitem.show(20)
+      //      lineitem.show(20)
     } else {
       println("Using sample")
       lineitem = session.createDataFrame(desc.samples(0).asInstanceOf[RDD[Row]], desc.lineitem.schema)
-//      lineitem.show(20)
+      //      lineitem.show(20)
     }
 
-    lineitem.filter($"l_shipdate" <= "1998-09-02")
-      .groupBy($"l_returnflag", $"l_linestatus")
+    val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
+    val increase = udf { (x: Double, y: Double) => x * (1 + y) }
+    val multitply = udf { (x: Double) => x * proportion }
+
+    // Calculate true date
+    val dateInterval: Long = params(0).toString().toLong
+    val date: String = calcDate("1998-12-01", "day", dateInterval, true)
+
+    val lineitemFilter = lineitem.filter($"l_shipdate" <= date)
+
+    lineitemFilter.groupBy($"l_returnflag", $"l_linestatus")
       .agg(sum($"l_quantity"), sum($"l_extendedprice"),
         sum(decrease($"l_extendedprice", $"l_discount")),
         sum(increase(decrease($"l_extendedprice", $"l_discount"), $"l_tax")),
         avg($"l_quantity"), avg($"l_extendedprice"), avg($"l_discount"), count($"l_quantity"))
       .sort($"l_returnflag", $"l_linestatus")
-     
+
   }
 
   def execute_Q3(desc: Description, session: SparkSession, params: List[Any]) = {
@@ -47,17 +78,18 @@ object Executor {
     // params(0) as :1
     // params(1) as :2
     import session.implicits._
-
+    
     val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
 
-    val fcust = desc.customer.filter($"c_mktsegment" === params(0))
-    val forders = desc.orders.filter($"o_orderdate" < params(1))
-    val flineitems = desc.lineitem.filter($"l_shipdate" > params(1))
+    val customFilter = desc.customer.filter($"c_mktsegment" === params(0))
+    val orderFilter = desc.orders.filter($"o_orderdate" < params(1))
+    val lineitemFilter = desc.lineitem.filter($"l_shipdate" > params(1))
 
-    fcust.join(forders, $"c_custkey" === forders("o_custkey"))
+    customFilter.join(orderFilter, $"c_custkey" === orderFilter("o_custkey"))
       .select($"o_orderkey", $"o_orderdate", $"o_shippriority")
-      .join(flineitems, $"o_orderkey" === flineitems("l_orderkey"))
-      .select($"l_orderkey",
+      .join(lineitemFilter, $"o_orderkey" === lineitemFilter("l_orderkey"))
+      .select(
+        $"l_orderkey",
         decrease($"l_extendedprice", $"l_discount").as("volume"),
         $"o_orderdate", $"o_shippriority")
       .groupBy($"l_orderkey", $"o_orderdate", $"o_shippriority")
@@ -71,15 +103,19 @@ object Executor {
     import session.implicits._
 
     val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
+    
+    val rname: String = params(0).toString()
+    val firstDate: String = params(1).toString()
+    val secondDate = calcDate(firstDate, "year", 1, false)
 
-    val forders = desc.orders.filter($"o_orderdate" < "1995-01-01" && $"o_orderdate" >= "1994-01-01")
-
-    desc.region.filter($"r_name" === "ASIA")
-      .join(desc.nation, $"r_regionkey" === desc.nation("n_regionkey"))
+    val orderFilter = desc.orders.filter($"o_orderdate" < firstDate && $"o_orderdate" >= secondDate)
+    val regionFilter = desc.region.filter($"r_name" === rname)
+    
+      regionFilter.join(desc.nation, $"r_regionkey" === desc.nation("n_regionkey"))
       .join(desc.supplier, $"n_nationkey" === desc.supplier("s_nationkey"))
       .join(desc.lineitem, $"s_suppkey" === desc.lineitem("l_suppkey"))
       .select($"n_name", $"l_extendedprice", $"l_discount", $"l_orderkey", $"s_nationkey")
-      .join(forders, $"l_orderkey" === forders("o_orderkey"))
+      .join(orderFilter, $"l_orderkey" === orderFilter("o_orderkey"))
       .join(desc.customer, $"o_custkey" === desc.customer("c_custkey") && $"s_nationkey" === desc.customer("c_nationkey"))
       .select($"n_name", decrease($"l_extendedprice", $"l_discount").as("value"))
       .groupBy($"n_name")
@@ -90,8 +126,21 @@ object Executor {
   def execute_Q6(desc: Description, session: SparkSession, params: List[Any]) = {
     import session.implicits._
 
-    val lineitem = desc.lineitem
+    var lineitem: DataFrame = null
+    //    var proportion = 1.0
+    //    var returnValue = _
 
+    if (desc.samples == null) {
+      println("Using whole dataframe")
+      lineitem = desc.lineitem
+      //      lineitem.show(20)
+    } else {
+      println("Using sample")
+      lineitem = session.createDataFrame(desc.samples(0).asInstanceOf[RDD[Row]], desc.lineitem.schema)
+      //      lineitem.show(20)
+    }
+   
+    
     lineitem.filter($"l_shipdate" >= "1994-01-01" && $"l_shipdate" < "1995-01-01" && $"l_discount" >= 0.05 && $"l_discount" <= 0.07 && $"l_quantity" < 24)
       .agg(sum($"l_extendedprice" * $"l_discount"))
   }
@@ -165,19 +214,35 @@ object Executor {
   def execute_Q10(desc: Description, session: SparkSession, params: List[Any]) = {
     import session.implicits._
 
-    val lineitem = desc.lineitem
+    var lineitem: DataFrame = null
+    var proportion = 1.0
+
+    if (desc.samples == null) {
+      println("Using whole dataframe")
+      lineitem = desc.lineitem
+      //      lineitem.show(20)
+    } else {
+      println("Using sample")
+      lineitem = session.createDataFrame(desc.samples(0).asInstanceOf[RDD[Row]], desc.lineitem.schema)
+      proportion = desc.sampleDescription.asInstanceOf[Double]
+      //      lineitem.show(20)
+    }
+
+    val date = params(0)
+
     val order = desc.orders
     val customer = desc.customer
     val nation = desc.nation
 
     val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
+    val multiply = udf { (x: Double) => x * proportion }
 
-    val flineitem = lineitem.filter($"l_returnflag" === "R")
+    val lineitemFilter = lineitem.filter($"l_returnflag" === "R")
+    val orderFilter = order.filter($"o_orderdate" >= "1993-10-01" && $"o_orderdate" < "1994-01-01")
 
-    order.filter($"o_orderdate" < "1994-01-01" && $"o_orderdate" >= "1993-10-01")
-      .join(customer, $"o_custkey" === customer("c_custkey"))
+    orderFilter.join(customer, $"o_custkey" === customer("c_custkey"))
       .join(nation, $"c_nationkey" === nation("n_nationkey"))
-      .join(flineitem, $"o_orderkey" === flineitem("l_orderkey"))
+      .join(lineitemFilter, $"o_orderkey" === lineitemFilter("l_orderkey"))
       .select($"c_custkey", $"c_name",
         decrease($"l_extendedprice", $"l_discount").as("volume"),
         $"c_acctbal", $"n_name", $"c_address", $"c_phone", $"c_comment")
@@ -284,8 +349,8 @@ object Executor {
 
     import session.implicits._
 
-    var lineitem: DataFrame = desc.lineitem
-    var part = desc.part
+    val lineitem: DataFrame = desc.lineitem
+    val part = desc.part
 
     val sm = udf { (x: String) => x.matches("SM CASE|SM BOX|SM PACK|SM PKG") }
     val md = udf { (x: String) => x.matches("MED BAG|MED BOX|MED PKG|MED PACK") }
@@ -318,10 +383,10 @@ object Executor {
     import session.implicits._
 
     var lineitem: DataFrame = null
-    var nation = desc.nation
-    var partsupp = desc.partsupp
-    var supplier = desc.supplier
-    var part = desc.part
+    val nation = desc.nation
+    val partsupp = desc.partsupp
+    val supplier = desc.supplier
+    val part = desc.part
 
     if (desc.samples == null) {
       println("Using whole dataframe")
