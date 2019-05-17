@@ -9,7 +9,7 @@ import org.apache.spark.sql.functions.udf
 import java.time._
 import java.time.format._
 
-object Executor {  
+object Executor {
 
   def calcDate(date: String, dateType: String, interval: Long, minus: Boolean): String = {
     val toDate = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -18,15 +18,15 @@ object Executor {
 
     if (minus) {
       dateType match {
-        case "day" => returnDate = initialDate.minusDays(interval).toString()
-        case "month" =>returnDate = initialDate.minusMonths(interval).toString()
-        case "year" => returnDate = initialDate.minusYears(interval).toString()
+        case "day"   => returnDate = initialDate.minusDays(interval).toString()
+        case "month" => returnDate = initialDate.minusMonths(interval).toString()
+        case "year"  => returnDate = initialDate.minusYears(interval).toString()
       }
     } else {
       dateType match {
-        case "day" => returnDate = initialDate.plusDays(interval).toString()
-        case "month" =>returnDate = initialDate.plusMonths(interval).toString()
-        case "year" => returnDate = initialDate.plusYears(interval).toString()
+        case "day"   => returnDate = initialDate.plusDays(interval).toString()
+        case "month" => returnDate = initialDate.plusMonths(interval).toString()
+        case "year"  => returnDate = initialDate.plusYears(interval).toString()
       }
     }
 
@@ -59,14 +59,21 @@ object Executor {
     val dateInterval: Long = params(0).toString().toLong
     val date: String = calcDate("1998-12-01", "day", dateInterval, true)
 
-    val lineitemFilter = lineitem.filter($"l_shipdate" <= date)
+    val where_ = lineitem.filter($"l_shipdate" <= date)
 
-    lineitemFilter.groupBy($"l_returnflag", $"l_linestatus")
-      .agg(sum($"l_quantity"), sum($"l_extendedprice"),
-        sum(decrease($"l_extendedprice", $"l_discount")),
-        sum(increase(decrease($"l_extendedprice", $"l_discount"), $"l_tax")),
-        avg($"l_quantity"), avg($"l_extendedprice"), avg($"l_discount"), count($"l_quantity"))
-      .sort($"l_returnflag", $"l_linestatus")
+    val grBy_ = where_.groupBy($"l_returnflag", $"l_linestatus")
+
+    val result = grBy_.agg(
+      sum($"l_quantity").as("sum_qty"),
+      sum($"l_extendedprice").as("sum_base_price"),
+      sum(decrease($"l_extendedprice", $"l_discount")).as("sum_disc_price"),
+      sum(increase(decrease($"l_extendedprice", $"l_discount"), $"l_tax")).as("sum_charge"),
+      avg($"l_quantity").as("avg_qty"),
+      avg($"l_extendedprice").as("avg_price"),
+      avg($"l_discount").as("avg_disc"),
+      count($"l_quantity").as("count_order"))
+
+    result.sort($"l_returnflag", $"l_linestatus")
 
   }
 
@@ -78,44 +85,46 @@ object Executor {
     // params(0) as :1
     // params(1) as :2
     import session.implicits._
-    
+
     val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
 
     val customFilter = desc.customer.filter($"c_mktsegment" === params(0))
     val orderFilter = desc.orders.filter($"o_orderdate" < params(1))
     val lineitemFilter = desc.lineitem.filter($"l_shipdate" > params(1))
 
-    customFilter.join(orderFilter, $"c_custkey" === orderFilter("o_custkey"))
+    val where_ = customFilter.join(orderFilter, $"c_custkey" === orderFilter("o_custkey"))
       .select($"o_orderkey", $"o_orderdate", $"o_shippriority")
       .join(lineitemFilter, $"o_orderkey" === lineitemFilter("l_orderkey"))
-      .select(
-        $"l_orderkey",
-        decrease($"l_extendedprice", $"l_discount").as("volume"),
-        $"o_orderdate", $"o_shippriority")
-      .groupBy($"l_orderkey", $"o_orderdate", $"o_shippriority")
-      .agg(sum($"volume").as("revenue"))
-      .sort($"revenue".desc, $"o_orderdate")
-      .limit(10)
+
+    val select_ = where_.select(
+      $"l_orderkey",
+      decrease($"l_extendedprice", $"l_discount").as("part_revenue"),
+      $"o_orderdate", $"o_shippriority")
+
+    val grBy_ = select_.groupBy($"l_orderkey", $"o_orderdate", $"o_shippriority")
+    val result = grBy_.agg(sum($"part_revenue").as("revenue"))
+
+    result.sort($"revenue".desc, $"o_orderdate").limit(10)
   }
 
   def execute_Q5(desc: Description, session: SparkSession, params: List[Any]) = {
-    // TODO: implement
     import session.implicits._
 
     val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
-    
+
     val rname: String = params(0).toString()
     val firstDate: String = params(1).toString()
     val secondDate = calcDate(firstDate, "year", 1, false)
 
     val orderFilter = desc.orders.filter($"o_orderdate" < firstDate && $"o_orderdate" >= secondDate)
     val regionFilter = desc.region.filter($"r_name" === rname)
-    
-      regionFilter.join(desc.nation, $"r_regionkey" === desc.nation("n_regionkey"))
+
+    val where_ = regionFilter.join(desc.nation, $"r_regionkey" === desc.nation("n_regionkey"))
       .join(desc.supplier, $"n_nationkey" === desc.supplier("s_nationkey"))
       .join(desc.lineitem, $"s_suppkey" === desc.lineitem("l_suppkey"))
       .select($"n_name", $"l_extendedprice", $"l_discount", $"l_orderkey", $"s_nationkey")
-      .join(orderFilter, $"l_orderkey" === orderFilter("o_orderkey"))
+      
+   val where2_ = where_.join(orderFilter, $"l_orderkey" === orderFilter("o_orderkey"))
       .join(desc.customer, $"o_custkey" === desc.customer("c_custkey") && $"s_nationkey" === desc.customer("c_nationkey"))
       .select($"n_name", decrease($"l_extendedprice", $"l_discount").as("value"))
       .groupBy($"n_name")
@@ -139,8 +148,7 @@ object Executor {
       lineitem = session.createDataFrame(desc.samples(0).asInstanceOf[RDD[Row]], desc.lineitem.schema)
       //      lineitem.show(20)
     }
-   
-    
+
     lineitem.filter($"l_shipdate" >= "1994-01-01" && $"l_shipdate" < "1995-01-01" && $"l_discount" >= 0.05 && $"l_discount" <= 0.07 && $"l_quantity" < 24)
       .agg(sum($"l_extendedprice" * $"l_discount"))
   }
@@ -157,8 +165,11 @@ object Executor {
 
     val getYear = udf { (x: String) => x.substring(0, 4) }
     val decrease = udf { (x: Double, y: Double) => x * (1 - y) }
+    
+    val r_name: String = params(0).toString()
+    val firstDate: String = params(1).toString()
+    val secondDate: String = calcDate(firstDate, "year", 1, false)
 
-    // cache fnation
 
     val fnation = nation.filter($"n_name" === "FRANCE" || $"n_name" === "GERMANY")
     val fline = lineitem.filter($"l_shipdate" >= "1995-01-01" && $"l_shipdate" <= "1996-12-31")
@@ -283,8 +294,21 @@ object Executor {
     val highPriority = udf { (x: String) => if (x == "1-URGENT" || x == "2-HIGH") 1 else 0 }
     val lowPriority = udf { (x: String) => if (x != "1-URGENT" && x != "2-HIGH") 1 else 0 }
 
-    var lineitem: DataFrame = desc.lineitem
-    var order = desc.orders
+    var lineitem: DataFrame = null
+    val order = desc.orders
+
+    var proportion = 1.0
+
+    if (desc.samples == null) {
+      println("Using whole dataframe")
+      lineitem = desc.lineitem
+      //      lineitem.show(20)
+    } else {
+      println("Using sample")
+      lineitem = session.createDataFrame(desc.samples(0).asInstanceOf[RDD[Row]], desc.lineitem.schema)
+      proportion = desc.sampleDescription.asInstanceOf[Double]
+      //      lineitem.show(20)
+    }
 
     lineitem.filter((
       $"l_shipmode" === "MAIL" || $"l_shipmode" === "SHIP") &&

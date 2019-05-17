@@ -30,26 +30,26 @@ object Sampler {
 
     // total query column sets appear in TPC-H queries
     val totalQcs = List(
-      List("l_returnflag", "l_linestatus", "l_shipdate"),                              //List(8, 9, 10) Q1
-      List("l_orderkey", "l_shipdate"),                                                //List(0, 10) Q3
-      List("l_orderkey", "l_suppkey"),                                                 //List(0, 2) Q5
-      List("l_quantity", "l_discount", "l_shipdate"),                                  //List(4, 6, 10) Q6
-      List("l_orderkey", "l_suppkey", "l_shipdate"),                                   //List(0, 2, 10) Q7
-      List("l_orderkey", "l_partkey", "l_suppkey"),                                    //List(0, 1, 2) Q9
-      List("l_orderkey", "l_returnflag"),                                              //List(0, 8) Q10
+      List("l_returnflag", "l_linestatus", "l_shipdate"), //List(8, 9, 10) Q1
+      List("l_orderkey", "l_shipdate"), //List(0, 10) Q3
+      List("l_orderkey", "l_suppkey"), //List(0, 2) Q5
+      List("l_quantity", "l_discount", "l_shipdate"), //List(4, 6, 10) Q6
+      List("l_orderkey", "l_suppkey", "l_shipdate"), //List(0, 2, 10) Q7
+      List("l_orderkey", "l_partkey", "l_suppkey"), //List(0, 1, 2) Q9
+      List("l_orderkey", "l_returnflag"), //List(0, 8) Q10
       List("l_orderkey", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipmode"), //List(0, 10, 11, 12, 14) Q11
-      List("l_partkey", "l_quantity"),                                                 //List(1, 4) Q12
-      List("l_orderkey", "l_quantity"),                                                //List(0, 4) Q17
-      List("l_partkey", "l_quantity", "l_shipinstruct", "l_shipmode"),                 //List(1, 4, 13, 14) Q18
-      List("l_partkey", "l_suppkey", "l_shipdate"))                                     //List(1, 2, 10) Q19
+      List("l_partkey", "l_quantity"), //List(1, 4) Q12
+      List("l_orderkey", "l_quantity"), //List(0, 4) Q17
+      List("l_partkey", "l_quantity", "l_shipinstruct", "l_shipmode"), //List(1, 4, 13, 14) Q18
+      List("l_partkey", "l_suppkey", "l_shipdate")) //List(1, 2, 10) Q19
     val totalQcsIndex = totalQcs.map(qcs => qcs.map(q => schema.indexOf(q)))
 
     // useful query column sets after hardcode
     val usefulQcs = List(
-      List("l_returnflag", "l_linestatus", "l_shipdate"),           //List(8, 9, 10)          //0.64%   /// Q1
-      List("l_orderkey", "l_returnflag"),                           //List(0, 8)              //34.49%  /// Q10
-      List("l_partkey", "l_quantity"),                              //List(1, 4)              //75.18%  /// Q12
-      List("l_quantity", "l_discount", "l_shipdate"))               //List(4, 6, 10)          //80.64%  /// Q6
+      List("l_returnflag", "l_linestatus", "l_shipdate"), //List(8, 9, 10)          //0.64%   /// Q1
+      List("l_orderkey", "l_returnflag"), //List(0, 8)              //34.49%  /// Q10
+      List("l_partkey", "l_quantity"), //List(1, 4)              //75.18%  /// Q12
+      List("l_quantity", "l_discount", "l_shipdate")) //List(4, 6, 10)          //80.64%  /// Q6
     val usefulQcsIndex = usefulQcs.map(qcs => qcs.map(q => schema.indexOf(q)))
     val attrIndex = schema.indexOf(aggColumn)
 
@@ -59,7 +59,8 @@ object Sampler {
     println("the # tuples can be stored: ", storageBudgetTuples)
 
     // calculate absolute error according to relative error and sum of l_extendedprice
-    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
+    //    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
+    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
     val errorBound = sumValue * e
 
     var haveStorageBudget = true
@@ -70,7 +71,7 @@ object Sampler {
       val dfAgg = lineitem.groupBy(usefulQcs(i).head, usefulQcs(i).tail: _*)
         .agg(functions.count(aggColumn), functions.var_pop(aggColumn))
         .select("count(" + aggColumn + ")", "var_pop(" + aggColumn + ")")
-      dfAgg.show()
+      //      dfAgg.show()
 
       //calculate magicK for specific qcs
       val magicK = magicKSearch(dfAgg, aggColumn, z, errorBound)
@@ -80,17 +81,16 @@ object Sampler {
       val qcsWithKey = lineitemRdd.map(row => (usefulQcsIndex(i).map(x => row(x)).mkString("_"), row)).groupByKey
       val stratifiedSample = qcsWithKey.map(x => (x._1, (x._2.size, x._2))).flatMap(x => ScaSRS(x._2, magicK))
       val sampleSize = stratifiedSample.count
-      
+
       println("stratified sample size: ", sampleSize)
       println("# groups:", qcsWithKey.keys.distinct.count.toInt)
-      
+
       //check whether have storage budget
-      if(sampleSize < storageBudgetTuples){
+      if (sampleSize < storageBudgetTuples) {
         storageBudgetTuples = storageBudgetTuples - sampleSize
-        stratifiedSampleList =  stratifiedSampleList :+ stratifiedSample
+        stratifiedSampleList = stratifiedSampleList :+ stratifiedSample
         println("remained# tuples can be stored: ", storageBudgetTuples)
-      }
-      else {
+      } else {
         haveStorageBudget = false
       }
       i += 1
@@ -135,6 +135,11 @@ object Sampler {
       // avoid loop
       if ((maxStrataSize < minStrataSize) && !satisfied) {
         magicK = maxStrataSize
+        foundMinK = true
+      }
+      
+      if ((maxStrataSize < minStrataSize) && satisfied) {
+        magicK = minStrataSize
         foundMinK = true
       }
     }
