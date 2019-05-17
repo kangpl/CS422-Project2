@@ -46,10 +46,10 @@ object Sampler {
 
     // useful query column sets after hardcode
     val usefulQcs = List(
-      List(List("l_returnflag", "l_linestatus", "l_shipdate"), List("Q1")),           //List(8, 9, 10)          //0.64%   /// Q1
-      List(List("l_orderkey", "l_returnflag"), List("Q10")),                          //List(0, 8)              //34.49%  /// Q10
-      List(List("l_partkey", "l_quantity"), List("Q12")),                             //List(1, 4)              //75.18%  /// Q12
-      List(List("l_quantity", "l_discount", "l_shipdate"), List("Q6")))               //List(4, 6, 10)          //80.64%  /// Q6
+      List(List("l_returnflag", "l_linestatus", "l_shipdate"), List("Q1")), //List(8, 9, 10)          //0.64%   /// Q1
+      List(List("l_orderkey", "l_returnflag"), List("Q10")), //List(0, 8)              //34.49%  /// Q10
+      List(List("l_partkey", "l_quantity"), List("Q12")), //List(1, 4)              //75.18%  /// Q12
+      List(List("l_quantity", "l_discount", "l_shipdate"), List("Q6"))) //List(4, 6, 10)          //80.64%  /// Q6
     val usefulQcsIndex = usefulQcs.map(qcs => qcs(0).map(q => schema.indexOf(q)))
     val attrIndex = schema.indexOf(aggColumn)
 
@@ -59,8 +59,8 @@ object Sampler {
     println("the # tuples can be stored: ", storageBudgetTuples)
 
     // calculate absolute error according to relative error and sum of l_extendedprice
-    //    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
-    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
+    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
+    //    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
     val errorBound = sumValue * e
 
     var haveStorageBudget = true
@@ -139,7 +139,7 @@ object Sampler {
         magicK = maxStrataSize
         foundMinK = true
       }
-      
+
       if ((maxStrataSize < minStrataSize) && satisfied) {
         magicK = minStrataSize
         foundMinK = true
