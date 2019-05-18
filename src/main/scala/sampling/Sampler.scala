@@ -54,6 +54,7 @@ object Sampler {
     val attrIndex = schema.indexOf(aggColumn)
 
     // according datatype to estimate the storage space of one tuple
+    // using defaultsize, we assume that one row = 172 bytes.
     val rowBytes = lineitem.schema.map(x => x.dataType.defaultSize).reduce((a, b) => a + b)
     var storageBudgetTuples = storageBudgetBytes / rowBytes
     println("# tuples can be stored: ", storageBudgetTuples)

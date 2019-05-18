@@ -329,14 +329,14 @@ object Executor {
 
     val baseQuery = nationFilter.join(supplier, $"n_nationkey" === supplier("s_nationkey"))
       .join(partsupp, $"s_suppkey" === partsupp("ps_suppkey"))
-      .select($"ps_partkey", mul($"ps_supplycost", $"ps_availqty").as("value"))
+      .select($"ps_partkey", mul($"ps_supplycost", $"ps_availqty").as("part_value"))
 
-    val having_ = baseQuery.agg(sum("value").as("having_value"))
+    val having_ = baseQuery.agg(sum("part_value").as("having_value"))
 
     val query = baseQuery.groupBy($"ps_partkey").agg(sum("value").as("query_value"))
       .join(having_, $"query_value" > mul2($"having_value"))
 
-    query.sort($"query_value".desc)
+    query.sort($"query_value".desc).select($"ps_partkey", ($"query_value").as("value"))
   }
 
   def execute_Q12(desc: Description, session: SparkSession, params: List[Any]) = {

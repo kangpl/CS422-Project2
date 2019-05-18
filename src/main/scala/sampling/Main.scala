@@ -58,55 +58,55 @@ object Main {
     // Execute first query
     println("Q1")
     val sampleResult1 = Executor.execute_Q1(desc_, session, List(90)) // to "1998-09-02"
-    sampleResult1.show()
+    sampleResult1.show(sampleResult1.count.toInt, false)
 
     println("Q3")
     val sampleResult3 = Executor.execute_Q3(desc_, session, List("BUILDING", "1995-03-15"))
-    sampleResult3.show()
+    sampleResult3.show(sampleResult3.count.toInt, false)
 
     println("Q5")
     val sampleResult5 = Executor.execute_Q5(desc_, session, List("ASIA", "1995-01-01"))
-    sampleResult5.show()
+    sampleResult5.show(sampleResult5.count.toInt, false)
 
     println("Q6")
     val sampleResult6 = Executor.execute_Q6(desc_, session, List("1994-01-01", 0.06, 24))
-    sampleResult6.show()
+    sampleResult6.show(sampleResult6.count.toInt, false)
 
     println("Q7")
     val sampleResult7 = Executor.execute_Q7(desc_, session, List("FRANCE", "GERMANY"))
-    sampleResult7.show()
+    sampleResult7.show(sampleResult7.count.toInt, false)
 
     println("Q9")
     val sampleResult9 = Executor.execute_Q9(desc_, session, List("green"))
-    sampleResult9.show()
+    sampleResult9.show(sampleResult9.count.toInt, false)
 
     println("Q10")
     val sampleResult10 = Executor.execute_Q10(desc_, session, List("1993-10-01"))
-    sampleResult10.show()
+    sampleResult10.show(sampleResult10.count.toInt, false)
 
     println("Q11")
     val sampleResult11 = Executor.execute_Q11(desc_, session, List("GERMANY", 0.0001))
-    sampleResult11.show()
+    sampleResult11.show(sampleResult11.count.toInt, false)
 
     println("Q12")
     val sampleResult12 = Executor.execute_Q12(desc_, session, List("MAIL", "SHIP", "1994-01-01"))
-    sampleResult12.show()
+    sampleResult12.show(sampleResult12.count.toInt, false)
 
     println("Q17")
     val sampleResult17 = Executor.execute_Q17(desc_, session, List("Brand#23", "MED BOX"))
-    sampleResult17.show()
+    sampleResult17.show(sampleResult17.count.toInt, false)
 
     println("Q18")
     val sampleResult18 = Executor.execute_Q18(desc_, session, List(300))
-    sampleResult18.show()
+    sampleResult18.show(sampleResult18.count.toInt, false)
 
     println("Q19")
     val sampleResult19 = Executor.execute_Q19(desc_, session, List("Brand#12", "Brand#23", "Brand#34", 1, 10, 20))
-    sampleResult19.show()
+    sampleResult19.show(sampleResult19.count.toInt, false)
 
     println("Q20")
     val sampleResult20 = Executor.execute_Q20(desc_, session, List("forest", "1994-01-01", "CANADA"))
-    sampleResult20.show()
+    sampleResult20.show(sampleResult20.count.toInt, false)
 
   }
 
