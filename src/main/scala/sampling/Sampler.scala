@@ -204,7 +204,8 @@ object Sampler {
 
       //select the smallest pn-l items from waitlist
       waitlist = waitlist.sortBy(_._1)
-      if (p * stratumSize - l > 0) res = res ++ waitlist.take(scala.math.ceil((p * stratumSize)).toInt - l).map(_._2)
+      if (K.toInt - l > 0) res = res ++ waitlist.take(K.toInt - l).map(_._2)
+//      if (p * stratumSize - l > 0) res = res ++ waitlist.take(scala.math.ceil((p * stratumSize)).toInt - l).map(_._2)
       res
     }
   }
