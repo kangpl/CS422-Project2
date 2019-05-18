@@ -59,8 +59,8 @@ object Sampler {
     println("# tuples can be stored: ", storageBudgetTuples)
 
     // calculate absolute error according to relative error and sum of l_extendedprice
-//    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
-    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
+    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.get(0).asInstanceOf[java.math.BigDecimal].doubleValue()
+//    val sumValue = lineitem.agg(functions.sum(aggColumn)).first.getDouble(0)
     val errorBound = sumValue * e
 
     var haveStorageBudget = true
