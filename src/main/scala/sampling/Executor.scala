@@ -155,6 +155,7 @@ object Executor {
 
     val sample = get_sample(desc, "Q6")
     var lineitem: DataFrame = null
+    var proportion: Double = 1.0
 
     if (sample == null) {
       println("Using whole dataframe")
@@ -162,7 +163,10 @@ object Executor {
     } else {
       println("Using sample")
       lineitem = session.createDataFrame(sample, desc.lineitem.schema)
+      proportion = desc.lineitem.count().toDouble / lineitem.count().toDouble
     }
+
+    val multiply = udf { (x: Double) => x * proportion }
 
     val firstDate: String = params(0).toString()
     val secondDate: String = calcDate(firstDate, "year", 1, false)
@@ -177,7 +181,7 @@ object Executor {
       $"l_shipdate" >= firstDate && $"l_shipdate" < secondDate &&
         $"l_discount" >= firstDiscount && $"l_discount" <= secondDiscount &&
         $"l_quantity" < givenQuantity)
-      .agg(sum($"l_extendedprice" * $"l_discount"))
+      .agg(multiply(sum($"l_extendedprice" * $"l_discount")))
   }
 
   def execute_Q7(desc: Description, session: SparkSession, params: List[Any]) = {
