@@ -1,0 +1,229 @@
+(this is the z value: ,1.96,according to confidence interval:,0.95)(# tuples can be stored: ,3488372)
+
+(maxStrataSize: ,250974.0)(minStrataSize: ,2.0)(K: ,125488.0)(estimateError: ,1.3616077912261126E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,125488.0)(minStrataSize: ,2.0)(K: ,62745.0)(estimateError: ,1.916108525414428E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,62745.0)(minStrataSize: ,2.0)(K: ,31373.0)(estimateError: ,2.7084277933907905E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,31373.0)(minStrataSize: ,2.0)(K: ,15687.0)(estimateError: ,3.829998094891756E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,15687.0)(minStrataSize: ,2.0)(K: ,7844.0)(estimateError: ,5.416221345025158E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,7844.0)(minStrataSize: ,2.0)(K: ,3923.0)(estimateError: ,7.6587103152937565E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,3923.0)(minStrataSize: ,2.0)(K: ,1962.0)(estimateError: ,1.0829670797591002E10,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,1962.0)(minStrataSize: ,2.0)(K: ,982.0)(estimateError: ,1.530766710300233E10,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,982.0)(minStrataSize: ,2.0)(K: ,492.0)(estimateError: ,2.1626298918758152E10,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,492.0)(minStrataSize: ,2.0)(K: ,247.0)(estimateError: ,3.0522231097736153E10,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,247.0)(minStrataSize: ,2.0)(K: ,124.0)(estimateError: ,4.307783915178093E10,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,124.0)(minStrataSize: ,2.0)(K: ,63.0)(estimateError: ,6.043582822869332E10,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,63.0)(minStrataSize: ,2.0)(K: ,32.0)(estimateError: ,8.479881116913434E10,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,32.0)(minStrataSize: ,2.0)(K: ,17.0)(estimateError: ,1.1634300909818652E11,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,17.0)(minStrataSize: ,2.0)(K: ,9.0)(estimateError: ,1.5989817177133984E11,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,9.0)(minStrataSize: ,2.0)(K: ,5.0)(estimateError: ,2.1452590893519232E11,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,5.0)(minStrataSize: ,2.0)(K: ,3.0)(estimateError: ,2.7695175754533606E11,  defined errorBound,2.294347191940904E11)Not satisfied
+(maxStrataSize: ,5.0)(minStrataSize: ,4.0)(K: ,4.0)(estimateError: ,2.3984725765700977E11,  defined errorBound,2.294347191940904E11)Not satisfied
+(maxStrataSize: ,5.0)(minStrataSize: ,5.0)(K: ,5.0)(estimateError: ,2.1452590893519235E11,  defined errorBound,2.294347191940904E11)Satisfied(
+this is the final magick: ,5.0,eatimate sample size: ,19085.0)(
+remained # tuples can be stored: ,3469287)
+(real stratified sample size: ,19090)
+(# groups:,3817)
+
+(maxStrataSize: ,7.0)(minStrataSize: ,2.0)(K: ,4.0)(estimateError: ,1.0079777429489868E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,4.0)(minStrataSize: ,2.0)(K: ,3.0)(estimateError: ,1.126206386718235E9,  defined errorBound,2.294347191940904E11)Satisfied
+(maxStrataSize: ,3.0)(minStrataSize: ,2.0)(K: ,2.0)(estimateError: ,1.3609226587314222E9,  defined errorBound,2.294347191940904E11)Satisfied(
+this is the final magick: ,2.0,eatimate sample size: ,3.58783897E8)not have enough storage budget(
+sampled qcs: ,List(Q1))Q1
+Using sample
+date: 1998-12-01 ; final date: 1998-09-02
++------------+------------+---------+--------------+--------------------+--------------------+---------+------------+--------+-----------+
+|l_returnflag|l_linestatus|  sum_qty|sum_base_price|      sum_disc_price|          sum_charge|  avg_qty|   avg_price|avg_disc|count_order|
++------------+------------+---------+--------------+--------------------+--------------------+---------+------------+--------+-----------+
+|           A|           F|161093.00|  241858802.00|    2.298846407314E8|2.3902587227389294E8|25.517662|38311.231110|0.049674|       6313|
+|           N|           F|  3809.00|    5820205.44|        5524880.2937|   5745459.971236998|25.393333|38801.369600|0.050933|        150|
+|           N|           O|149164.00|  223156206.98|2.1202062164229998E8|2.2053051034787208E8|25.432907|38048.799144|0.050002|       5865|
+|           R|           F|161830.00|  243253570.36|2.3140393381780002E8|2.4064167490298828E8|25.642529|38544.378127|0.048923|       6311|
++------------+------------+---------+--------------+--------------------+--------------------+---------+------------+--------+-----------+
+
+Q3
++----------+-----------+--------------+------------------+
+|l_orderkey|o_orderdate|o_shippriority|           revenue|
++----------+-----------+--------------+------------------+
+| 249739810| 1995-02-28|             0|492136.85370000004|
+| 165214338| 1995-03-09|             0|       485645.5293|
+| 507274210| 1995-03-10|             0| 485256.2466999999|
+| 202071367| 1995-03-12|             0|       474746.4068|
+|  37307463| 1995-02-06|             0|474325.19379999995|
+| 461984355| 1995-03-13|             0|       468002.5274|
+| 100810368| 1995-02-28|             0|467932.76450000005|
+|  74015523| 1995-03-14|             0|       467786.8027|
+| 402772582| 1995-03-10|             0|463367.06649999996|
+| 367111712| 1995-03-01|             0|       462559.3977|
++----------+-----------+--------------+------------------+
+
+Q5
+date: 1995-01-01 ; final date: 1994-01-01
++---------+-------------------+
+|   n_name|            revenue|
++---------+-------------------+
+|  VIETNAM|5.310749966866999E9|
+|    INDIA|5.296094837750299E9|
+|    JAPAN|5.282184528825401E9|
+|    CHINA|5.270934901560199E9|
+|INDONESIA|5.270340980460801E9|
++---------+-------------------+
+
+Q6
+Using whole dataframe
+date: 1994-01-01 ; final date: 1995-01-01
++-----------------------------------+
+|sum((l_extendedprice * l_discount))|
++-----------------------------------+
+|                   12330426888.4637|
++-----------------------------------+
+
+Q7
++-----------+-----------+------+--------------------+
+|supp_nation|cust_nation|l_year|             revenue|
++-----------+-----------+------+--------------------+
+|     FRANCE|    GERMANY|  1995| 5.296106289740705E9|
+|     FRANCE|    GERMANY|  1996| 5.313955237564994E9|
+|    GERMANY|     FRANCE|  1995| 5.286060012210799E9|
+|    GERMANY|     FRANCE|  1996|5.3247291388921995E9|
++-----------+-----------+------+--------------------+
+
+Q9
++---------+------+--------------------+
+|   nation|o_year|          sum_profit|
++---------+------+--------------------+
+|  ALGERIA|  1998|   2.7463884738032E9|
+|  ALGERIA|  1997| 4.705096214193399E9|
+|  ALGERIA|  1996| 4.691101028388001E9|
+|  ALGERIA|  1995| 4.692240612220901E9|
+|  ALGERIA|  1994| 4.677512644204899E9|
+|  ALGERIA|  1993|   4.6843675838281E9|
+|  ALGERIA|  1992| 4.704266160031404E9|
+|ARGENTINA|  1998|2.7185130108517003E9|
+|ARGENTINA|  1997|   4.6463185966846E9|
+|ARGENTINA|  1996| 4.656102598041201E9|
+|ARGENTINA|  1995| 4.652753173228304E9|
+|ARGENTINA|  1994| 4.645991799532702E9|
+|ARGENTINA|  1993| 4.643401137562703E9|
+|ARGENTINA|  1992|   4.6178488967718E9|
+|   BRAZIL|  1998|2.7311406771162996E9|
+|   BRAZIL|  1997| 4.675931143507601E9|
+|   BRAZIL|  1996|   4.6653970719817E9|
+|   BRAZIL|  1995| 4.661653435263699E9|
+|   BRAZIL|  1994|   4.6648290563807E9|
+|   BRAZIL|  1993| 4.675246060521101E9|
++---------+------+--------------------+
+only showing top 20 rows
+
+Q10
+Using whole dataframe
+date: 1993-10-01 ; final date: 1994-01-01
++---------+------------------+---------+---------------+--------------+--------------------+--------------------+-----------------+
+|c_custkey|            c_name|c_acctbal|        c_phone|        n_name|           c_address|           c_comment|          revenue|
++---------+------------------+---------+---------------+--------------+--------------------+--------------------+-----------------+
+|  7450894|Customer#007450894|   927.18|11-833-256-7879|     ARGENTINA|hxPXtdJ84fyOre7gM...|packages are insi...|      936768.8469|
+|  9739771|Customer#009739771|  1286.48|23-281-450-4794|        JORDAN|  tC7c8bZ7 By6nEoHRL|p furiously depos...|      842966.5285|
+|  4571035|Customer#004571035|  6704.13|33-138-285-3770|UNITED KINGDOM|20IDf0Fx1ahSqImFX...|e carefully acros...|838705.6168000001|
+|   637855|Customer#000637855|  2674.86|26-852-120-2850|    MOZAMBIQUE|         q5TskwlicGP|al instructions s...|      812034.3778|
+| 10781974|Customer#010781974|  5079.77|29-651-722-6239|       ROMANIA|Cv2p,eRTt8C  WwJV...|egular notornis. ...|801735.5176000001|
+| 11361613|Customer#011361613|  4644.71|19-344-539-9187|     INDONESIA|     jWKghIqWp5Vzt2s|latelets cajole s...|800558.4336999999|
+|  1259743|Customer#001259743|  2592.74|15-733-636-6732|      ETHIOPIA|YVe ,jDra4xnKtfzS...|eposits sleep acc...|793274.7845999999|
+|  5154136|Customer#005154136|  1028.97|25-841-379-9394|       MOROCCO|Y,cjCdRGVz1j g8YQ...|boost quickly sly...|      787191.1959|
+| 14986552|Customer#014986552|  2678.94|11-671-762-3613|     ARGENTINA|          tl5yB8W1C0|ual ideas sleep d...|781645.8637999999|
+|  2905816|Customer#002905816|  5085.53|34-217-584-5820| UNITED STATES|          bcLOp3b9PA| the furiously ex...|778729.4413999999|
+|  6184141|Customer#006184141|  5901.88|12-563-743-4211|        BRAZIL|YouilzzEFBn8Q6atx...|en instructions b...|772721.0972999999|
+|  7852024|Customer#007852024|  1197.57|18-141-580-3886|         INDIA|2 lZJ,yBgPkRHVO6y...|osits haggle quic...|      769688.6616|
+|  7183231|Customer#007183231|  -683.01|18-270-127-8463|         INDIA|     ozSXeIbCwiOQJhN|braids. furiously...|      768455.8796|
+|  1627651|Customer#001627651|  3059.82|25-732-202-4862|       MOROCCO|cp3JS2a9Yu8cBKaDr...|ts cajole careful...|      768300.3006|
+| 13624771|Customer#013624771|  -168.68|20-919-886-5399|          IRAN|sxMG5r82qFaZLAqmC...|the, final reques...|      767856.1562|
+| 13896424|Customer#013896424|  3798.91|19-494-837-4503|     INDONESIA|          csALLLLaTB| cajole carefully...|760957.6214000001|
+|  4926817|Customer#004926817|  5462.22|32-610-751-1595|        RUSSIA|       X9PvpAssUMkoi|carefully unusual...|758756.8533000001|
+|   319150|Customer#000319150|  3257.68|20-837-276-7259|          IRAN|l1KV7LZ3ih7cgjuQU...|ly ironic request...|      757235.8949|
+|  5894188|Customer#005894188|  3062.00|12-372-345-6045|        BRAZIL|1PrX23NPGc 81N8nM...|unts after the sl...|756482.0641000001|
+|  3387028|Customer#003387028|  3726.64|15-880-219-8399|      ETHIOPIA|       j4HWo86pMyWym|ckly among the fu...|      755937.5757|
++---------+------------------+---------+---------------+--------------+--------------------+--------------------+-----------------+
+
+Q11
++----------+-----------+------------+
+|ps_partkey|query_value|having_value|
++----------+-----------+------------+
++----------+-----------+------------+
+
+Q12
+Using whole dataframe
+date: 1994-01-01 ; final date: 1995-01-01
++----------+---------------+--------------+
+|l_shipmode|high_line_count|low_line_count|
++----------+---------------+--------------+
+|      MAIL|         623115|        934713|
+|      SHIP|         622979|        934534|
++----------+---------------+--------------+
+
+Q17
++-------------------+
+|         avg_yearly|
++-------------------+
+|3.208701899857143E7|
++-------------------+
+
+Q18
++------------------+---------+----------+-----------+------------+---------------+
+|            c_name|c_custkey|o_orderkey|o_orderdate|o_totalprice|sum(l_quantity)|
++------------------+---------+----------+-----------+------------+---------------+
+|Customer#011472112| 11472112| 458304292| 1998-02-05|   591036.15|         322.00|
+|Customer#012090925| 12090925| 501322081| 1995-02-04|   586945.44|         319.00|
+|Customer#001392379|  1392379| 332381222| 1998-01-24|   575600.00|         311.00|
+|Customer#013458721| 13458721| 333307747| 1997-12-19|   572334.88|         319.00|
+|Customer#008643083|  8643083|  84927619| 1997-06-29|   571417.48|         316.00|
+|Customer#010543705| 10543705| 163142919| 1996-06-10|   569798.10|         313.00|
+|Customer#000026377|    26377| 586594688| 1992-04-14|   569044.84|         311.00|
+|Customer#005914657|  5914657|  55799200| 1996-02-11|   568754.48|         327.00|
+|Customer#011461310| 11461310|  20662370| 1992-07-22|   566353.20|         315.00|
+|Customer#007682894|  7682894| 532736640| 1993-07-22|   563532.16|         316.00|
+|Customer#012070685| 12070685|  34201984| 1997-06-18|   563492.49|         322.00|
+|Customer#012878113| 12878113|  42290181| 1997-11-26|   563479.57|         318.00|
+|Customer#000506836|   506836| 116567399| 1992-03-21|   563342.71|         319.00|
+|Customer#012848143| 12848143| 501771233| 1994-12-06|   562642.03|         317.00|
+|Customer#003493022|  3493022| 182898470| 1996-01-09|   561296.06|         318.00|
+|Customer#013083751| 13083751|  28077922| 1996-10-27|   560893.88|         319.00|
+|Customer#006580315|  6580315| 343593507| 1994-05-20|   560058.60|         321.00|
+|Customer#009427249|  9427249|  48881602| 1993-09-19|   559502.82|         327.00|
+|Customer#009995401|  9995401| 530897159| 1994-05-02|   558771.77|         305.00|
+|Customer#006094567|  6094567| 156159680| 1994-11-15|   558037.12|         308.00|
++------------------+---------+----------+-----------+------------+---------------+
+only showing top 20 rows
+
+Q19
++--------------------+
+|             revenue|
++--------------------+
+|2.9893772888199985E8|
++--------------------+
+
+Q20
+date: 1994-01-01 ; final date: 1995-01-01
++------------------+--------------------+
+|            s_name|           s_address|
++------------------+--------------------+
+|Supplier#000000091|YV45D7TkfdQanOOZ7...|
+|Supplier#000000157|         ,mEGorBfVIm|
+|Supplier#000000197|YC2Acon6kjY3zj3Fb...|
+|Supplier#000000205|        rF uV8d0JNEk|
+|Supplier#000000287|   7a9SP7qW5Yku5PvSg|
+|Supplier#000000354|          w8fOo5W,aS|
+|Supplier#000000361|f8IUYRmdVXhQC9qJQ...|
+|Supplier#000000402|i9Sw4DoyMhzhKXCH9...|
+|Supplier#000000555|TfB,a5bfl3Ah 3Z 7...|
+|Supplier#000000640|mvvtlQKsTOsJj5Ihk...|
+|Supplier#000000710|f19YPvOyb QoYwjKC...|
+|Supplier#000000736|l6i2nMwVuovfKnuVg...|
+|Supplier#000000761|zlSLelQUj2XrvTTFn...|
+|Supplier#000000848|       tx44JAuF,Jnw1|
+|Supplier#000000884|          bmhEShejaS|
+|Supplier#000000887| urEaTejH5POADP2ARrf|
+|Supplier#000000935|ij98czM 2KzWe7dDT...|
+|Supplier#000000975|,AC e,tBpNwKb5xMU...|
+|Supplier#000001033|A6x1P,56sVHkb4DqV...|
+|Supplier#000001367|42YSkFcAXMMcucsqe...|
++------------------+--------------------+
+only showing top 20 rows
+
