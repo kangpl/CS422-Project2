@@ -333,7 +333,7 @@ object Executor {
 
     val having_ = baseQuery.agg(sum("part_value").as("having_value"))
 
-    val query = baseQuery.groupBy($"ps_partkey").agg(sum("value").as("query_value"))
+    val query = baseQuery.groupBy($"ps_partkey").agg(sum("part_value").as("query_value"))
       .join(having_, $"query_value" > mul2($"having_value"))
 
     query.sort($"query_value".desc).select($"ps_partkey", ($"query_value").as("value"))
