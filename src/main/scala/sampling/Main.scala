@@ -15,6 +15,7 @@ object Main {
 
     if (onCluster) {
       sparkConf = new SparkConf().setAppName("CS422-Project2")
+      //      path = "../cs422-group13/test/tpch_parquet_sf1/"
       path = "/cs422-data/tpch/sf100/parquet/"
     } else {
       sparkConf = new SparkConf().setAppName("CS422-Project2").setMaster("local[16]")
